@@ -1,8 +1,9 @@
 #include "interpreter.h"
 
-#include "builtin_value.h"
 #include "symbol_table.h"
+#include "value.h"
 
+#include <cstdint>
 #include <iostream>
 
 namespace sscript
@@ -11,11 +12,11 @@ namespace bin_ops
 {
 struct add
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs + rhs; }
-	static builtin_value apply(const std::string &lhs, const std::string &rhs) { return lhs + rhs; }
+	static value apply(const Float &lhs, const Float &rhs) { return Float(lhs.m_value + rhs.m_value); }
+	static value apply(const String &lhs, const String &rhs) { return String(lhs.m_value + rhs.m_value); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to add operands");
 	}
@@ -23,10 +24,10 @@ struct add
 
 struct sub
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs - rhs; }
+	static value apply(const Float &lhs, const Float &rhs) { return Float(lhs.m_value - rhs.m_value); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to subtract operands");
 	}
@@ -34,20 +35,20 @@ struct sub
 
 struct mul
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs * rhs; }
-	static builtin_value apply(const std::string &lhs, const float &rhs)
+	static value apply(const Float &lhs, const Float &rhs) { return Float(lhs.m_value * rhs.m_value); }
+	static value apply(const String &lhs, const Float &rhs)
 	{
-		auto r = lhs;
-		for (auto i = 0u; i < rhs; ++i)
+		std::string r;
+		for (auto i = 0u; i < static_cast<uint32_t>(rhs.m_value); ++i)
 		{
-			r += lhs;
+			r += lhs.m_value;
 		}
-		return r;
+		return String(r);
 	}
-	static builtin_value apply(const float &lhs, const std::string &rhs) { return apply(rhs, lhs); }
+	static value apply(const Float &lhs, const String &rhs) { return apply(rhs, lhs); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to multiply operands");
 	}
@@ -55,10 +56,10 @@ struct mul
 
 struct div
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs / rhs; }
+	static value apply(const Float &lhs, const Float &rhs) { return Float(lhs.m_value / rhs.m_value); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to divide operands");
 	}
@@ -66,12 +67,12 @@ struct div
 
 struct eq
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs == rhs; }
-	static builtin_value apply(const bool &lhs, const bool &rhs) { return lhs == rhs; }
-	static builtin_value apply(const std::string &lhs, const std::string &rhs) { return lhs == rhs; }
+	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value == rhs.m_value); }
+	static value apply(const Boolean &lhs, const Boolean &rhs) { return Boolean(lhs.m_value == rhs.m_value); }
+	static value apply(const String &lhs, const String &rhs) { return Boolean(lhs.m_value == rhs.m_value); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -79,12 +80,12 @@ struct eq
 
 struct ne
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs != rhs; }
-	static builtin_value apply(const bool &lhs, const bool &rhs) { return lhs != rhs; }
-	static builtin_value apply(const std::string &lhs, const std::string &rhs) { return lhs != rhs; }
+	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value != rhs.m_value); }
+	static value apply(const Boolean &lhs, const Boolean &rhs) { return Boolean(lhs.m_value != rhs.m_value); }
+	static value apply(const String &lhs, const String &rhs) { return Boolean(lhs.m_value != rhs.m_value); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -92,10 +93,10 @@ struct ne
 
 struct gt
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs > rhs; }
+	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value > rhs.m_value); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -103,10 +104,10 @@ struct gt
 
 struct gte
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs >= rhs; }
+	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value >= rhs.m_value); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -114,10 +115,10 @@ struct gte
 
 struct lt
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs < rhs; }
+	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value < rhs.m_value); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -125,10 +126,10 @@ struct lt
 
 struct lte
 {
-	static builtin_value apply(const float &lhs, const float &rhs) { return lhs <= rhs; }
+	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value <= rhs.m_value); }
 
 	template<typename LHS, typename RHS>
-	static builtin_value apply(const LHS &lhs, const RHS &rhs)
+	static value apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -139,10 +140,10 @@ namespace unary_ops
 {
 struct negate
 {
-	static builtin_value apply(const bool &b) { return !b; }
+	static value apply(const Boolean &b) { return Boolean(!b.m_value); }
 
 	template<typename T>
-	static builtin_value apply(const T &v)
+	static value apply(const T &v)
 	{
 		throw std::runtime_error("Unable to negate operand");
 	}
@@ -150,10 +151,10 @@ struct negate
 
 struct minus
 {
-	static builtin_value apply(const float &f) { return -f; }
+	static value apply(const Float &f) { return Float(-f.m_value); }
 
 	template<typename T>
-	static builtin_value apply(const T &v)
+	static value apply(const T &v)
 	{
 		throw std::runtime_error("Unable to apply minus to operand");
 	}
@@ -161,38 +162,38 @@ struct minus
 }  // namespace unary_ops
 
 template<class Op>
-struct unary_ops_dispatcher : public boost::static_visitor<builtin_value>
+struct unary_ops_dispatcher : public boost::static_visitor<value>
 {
 	template<typename Operand>
-	builtin_value operator()(const Operand &operand)
+	value operator()(const Operand &operand)
 	{
 		return Op::apply(operand);
 	}
 };
 
 template<class OP>
-struct binary_op_dispatcher : public boost::static_visitor<builtin_value>
+struct binary_op_dispatcher : public boost::static_visitor<value>
 {
-	builtin_value m_lhs;
-	builtin_value m_rhs;
+	value m_lhs;
+	value m_rhs;
 
-	binary_op_dispatcher(const builtin_value &lhs, const builtin_value &rhs) : m_lhs(lhs), m_rhs(rhs) {}
+	binary_op_dispatcher(const value &lhs, const value &rhs) : m_lhs(lhs), m_rhs(rhs) {}
 
 	template<typename LHS>
-	struct binary_op_rhs_dispatcher : public boost::static_visitor<builtin_value>
+	struct binary_op_rhs_dispatcher : public boost::static_visitor<value>
 	{
 		const LHS &m_lhs;
 		binary_op_rhs_dispatcher(const LHS &lhs) : m_lhs(lhs) {}
 
 		template<typename RHS>
-		builtin_value operator()(const RHS &rhs)
+		value operator()(const RHS &rhs)
 		{
 			return OP::apply(m_lhs, rhs);
 		}
 	};
 
 	template<typename LHS>
-	builtin_value operator()(const LHS &lhs)
+	value operator()(const LHS &lhs)
 	{
 		binary_op_rhs_dispatcher<LHS> rhs_visitor{lhs};
 		return boost::apply_visitor(rhs_visitor, m_rhs);
@@ -201,9 +202,10 @@ struct binary_op_dispatcher : public boost::static_visitor<builtin_value>
 
 struct is_true : public boost::static_visitor<bool>
 {
-	bool operator()(const float &f) { return f; }
-	bool operator()(const bool &b) { return b; }
-	bool operator()(const std::string &s) { return s.size() != 0; }
+	bool operator()(const Float &f) { return f.m_value; }
+	bool operator()(const Boolean &b) { return b.m_value; }
+	bool operator()(const String &s) { return s.m_value.size() != 0; }
+	bool operator()(const NullObject &n) { return false; }
 };
 
 struct interpreter_visitor
@@ -247,32 +249,32 @@ struct interpreter_visitor
 		}
 		else
 		{
-			m_symbolTable->AddSymbol({decl.m_variableName.m_identifier, builtin_value()});
+			m_symbolTable->AddSymbol({decl.m_variableName.m_identifier, value()});
 		}
 	}
 
 	void visit(const ast::statement &statement)
 	{
-		dispatcher_visitor<builtin_value> v(this);
+		dispatcher_visitor<value> v(this);
 		boost::apply_visitor(v, statement.m_statement);
 	}
 
-	builtin_value visit(const ast::expression &expresion)
+	value visit(const ast::expression &expresion)
 	{
-		dispatcher_visitor<builtin_value> v(this);
+		dispatcher_visitor<value> v(this);
 		return boost::apply_visitor(v, expresion);
 	}
 
-	builtin_value visit(const ast::number &n) { return n.m_number; }
+	value visit(const ast::number &n) { return Float(n.m_number); }
 
-	builtin_value visit(const ast::string &s) { return s.m_string; }
+	value visit(const ast::string &s) { return String(s.m_string); }
 
-	builtin_value visit(const bool &b) { return b; }
-	builtin_value visit(const ast::null &n) { return false; }
+	value visit(const bool &b) { return Boolean(b); }
+	value visit(const ast::null &n) { return NullObject(); }
 
-	builtin_value visit(const ast::identifier &i) { return m_symbolTable->GetSymbol(i.m_identifier).m_value; }
+	value visit(const ast::identifier &i) { return m_symbolTable->GetSymbol(i.m_identifier).m_value; }
 
-	builtin_value visit(const ast::arithmetic_op &op)
+	value visit(const ast::arithmetic_op &op)
 	{
 		auto lhs = visit(op.m_lhs);
 		auto rhs = visit(op.m_rhs);
@@ -301,10 +303,10 @@ struct interpreter_visitor
 			}
 		}
 
-		return 0.0f;
+		throw std::runtime_error("Unknown arithmetic_op");
 	}
 
-	builtin_value visit(const ast::unary &op)
+	value visit(const ast::unary &op)
 	{
 		auto operand = visit(op.m_operand);
 
@@ -325,7 +327,7 @@ struct interpreter_visitor
 		throw std::runtime_error("Unknown unary op");
 	}
 
-	builtin_value visit(const ast::comparison_op &op)
+	value visit(const ast::comparison_op &op)
 	{
 		auto lhs = visit(op.m_lhs);
 		auto rhs = visit(op.m_rhs);
@@ -367,7 +369,7 @@ struct interpreter_visitor
 		throw std::runtime_error("Unknown comparison op");
 	}
 
-	builtin_value visit(const ast::logic_op &op)
+	value visit(const ast::logic_op &op)
 	{
 		auto lhs = visit(op.m_lhs);
 		is_true t;
@@ -379,25 +381,25 @@ struct interpreter_visitor
 				if (lhs_true)
 				{
 					auto rhs = visit(op.m_rhs);
-					return boost::apply_visitor(t, rhs);
+					return Boolean(boost::apply_visitor(t, rhs));
 				}
-				return false;
+				return Boolean(false);
 			}
 			case ast::logic_op::types::Or:
 			{
 				if (lhs_true)
 				{
-					return true;
+					return Boolean(true);
 				}
 				auto rhs = visit(op.m_rhs);
-				return boost::apply_visitor(t, rhs);
+				return Boolean(boost::apply_visitor(t, rhs));
 			}
 		}
 
-		return true;
+		throw std::runtime_error("Unknown logic op");
 	}
 
-	builtin_value visit(const ast::assignment &assignment)
+	value visit(const ast::assignment &assignment)
 	{
 		auto rhs = visit(assignment.m_rhs);
 		auto symbol = m_symbolTable->GetSymbol(assignment.m_variableName.m_identifier);

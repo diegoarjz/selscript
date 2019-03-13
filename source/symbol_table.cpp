@@ -20,28 +20,22 @@ SymbolTable::SymbolEntry& SymbolTable::GetSymbol(const std::string name)
 	throw std::runtime_error("Unable to find symbol");
 }
 
+struct value_visitor : boost::static_visitor<std::string>
+{
+	template<typename T>
+	std::string operator()(const T& v)
+	{
+		return v.ToString();
+	}
+};
+
 void SymbolTable::DumpSymbols() const
 {
-	struct type_visitor : boost::static_visitor<std::string>
-	{
-		std::string operator()(const bool& b) const { return "bool"; }
-		std::string operator()(const float& f) const { return "float"; }
-		std::string operator()(const std::string& s) const { return "string"; }
-	};
-
-	struct value_visitor : boost::static_visitor<std::string>
-	{
-		std::string operator()(const bool& b) const { return b ? "true" : "false"; }
-		std::string operator()(const float& f) const { return std::to_string(f); }
-		std::string operator()(const std::string& s) const { return s; }
-	};
 	value_visitor v;
-	type_visitor t;
 
 	for (auto symbol : m_symbols)
 	{
-		std::cout << boost::apply_visitor(t, symbol.second.m_value) << " " << symbol.first << " : "
-		          << boost::apply_visitor(v, symbol.second.m_value) << std::endl;
+		std::cout << symbol.first << ": " << boost::apply_visitor(v, symbol.second.m_value) << std::endl;
 	}
 }
 

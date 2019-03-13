@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast.h"
-#include "builtin_value.h"
+#include "value.h"
 
 #include <memory>
 #include <unordered_map>
@@ -14,7 +14,7 @@ public:
 	struct SymbolEntry
 	{
 		std::string m_symbolName;
-		builtin_value m_value;
+		value m_value;
 	};
 
 	SymbolTable() = default;

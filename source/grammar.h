@@ -98,6 +98,8 @@ ast::logic_op make_logic_op(const std::string &op, const ast::expression &lhs, c
 	throw std::runtime_error("Invalid operator");
 }
 
+ast::null make_null() { return ast::null(); }
+
 template<class Iterator>
 struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spirit::qi::space_type>
 {
@@ -198,6 +200,7 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spi
 		 *            | "(" expression ")"
 		 */
 		primary = qi::lit("true")[_val = true] | qi::lit("false")[_val = false] |
+		          qi::lit("null")[_val = boost::phoenix::bind(make_null)] |
 		          (number | string | identifier)[_val = qi::_1] | ('(' >> expression > ')');
 	}
 
