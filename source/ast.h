@@ -133,7 +133,9 @@ struct assignment
 	expression m_rhs;
 };
 
-using statement_types = boost::variant<expression>;
+struct statement_block;
+using statement_types = boost::variant<expression, boost::recursive_wrapper<statement_block>>;
+
 struct statement
 {
 	statement_types m_statement;
@@ -149,6 +151,11 @@ using declaration_types = boost::variant<var_decl, statement>;
 struct declaration
 {
 	declaration_types m_declaration;
+};
+
+struct statement_block
+{
+	std::vector<declaration> m_declarations;
 };
 
 struct program

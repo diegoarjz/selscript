@@ -21,6 +21,7 @@ BOOST_FUSION_ADAPT_STRUCT(sscript::ast::logic_op, (sscript::ast::logic_op::types
 BOOST_FUSION_ADAPT_STRUCT(sscript::ast::assignment, (sscript::ast::identifier, m_variableName),
                           (sscript::ast::expression, m_rhs))
 BOOST_FUSION_ADAPT_STRUCT(sscript::ast::statement, (sscript::ast::statement_types, m_statement))
+BOOST_FUSION_ADAPT_STRUCT(sscript::ast::statement_block, (std::vector<sscript::ast::declaration>, m_declarations))
 BOOST_FUSION_ADAPT_STRUCT(sscript::ast::var_decl, (sscript::ast::identifier, m_variableName),
                           (boost::optional<sscript::ast::expression>, m_rhs))
 BOOST_FUSION_ADAPT_STRUCT(sscript::ast::declaration, (sscript::ast::declaration_types, m_declaration))
@@ -129,14 +130,20 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spi
 		var_decl %= "var" > identifier >> -('=' > expression) > ';';
 
 		/*
-		 * statement -> expression_statement
+		 * statement -> expression_statement | if_statement | block
 		 */
-		statement %= expression_statement;
+		statement %= expression_statement | statement_block;
+
+		statement_block %= "{" >> *declaration >> "}";
 
 		/*
 		 * expression_statement -> expression ";"
 		 */
 		expression_statement %= expression > ';';
+
+		/*
+		 * if_statement -> "if" "(" expression ")" statement ("else" statement)?
+		 */
 
 		/*
 		 * expression -> assignment;
@@ -212,6 +219,8 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spi
 	rule<Iterator, ast::declaration(), space_type> declaration;
 	rule<Iterator, ast::var_decl(), space_type> var_decl;
 	rule<Iterator, ast::statement(), space_type> statement;
+	rule<Iterator, ast::statement_block, space_type> statement_block;
+	rule<Iterator, ast::statement(), space_type> if_statement;
 	rule<Iterator, ast::expression(), space_type> expression;
 	rule<Iterator, ast::expression(), space_type> expression_statement;
 	rule<Iterator, ast::expression(), space_type> assignment;

@@ -210,7 +210,8 @@ struct is_true : public boost::static_visitor<bool>
 
 struct interpreter_visitor
 {
-	interpreter_visitor(SymbolTable *symbolTable) : m_symbolTable(symbolTable) {}
+	interpreter_visitor() : m_symbolTable(std::make_shared<SymbolTable>("Global")) {}
+	~interpreter_visitor() { m_symbolTable->DumpSymbols(); }
 
 	template<typename Ret = void>
 	struct dispatcher_visitor : boost::static_visitor<Ret>
@@ -245,11 +246,11 @@ struct interpreter_visitor
 		if (decl.m_rhs)
 		{
 			auto rhs = visit(decl.m_rhs.get());
-			m_symbolTable->AddSymbol({decl.m_variableName.m_identifier, rhs});
+			m_symbolTable->Declare({decl.m_variableName.m_identifier, rhs});
 		}
 		else
 		{
-			m_symbolTable->AddSymbol({decl.m_variableName.m_identifier, value()});
+			m_symbolTable->Declare({decl.m_variableName.m_identifier, value()});
 		}
 	}
 
@@ -265,6 +266,22 @@ struct interpreter_visitor
 		return boost::apply_visitor(v, expresion);
 	}
 
+	value visit(const ast::statement_block &block)
+	{
+		auto previousSymbolTable = m_symbolTable;
+		m_symbolTable = std::make_shared<SymbolTable>("Anonymous Block", previousSymbolTable);
+
+		for (const auto &declaration : block.m_declarations)
+		{
+			visit(declaration);
+		}
+
+		m_symbolTable->DumpSymbols();
+		m_symbolTable = previousSymbolTable;
+
+		return NullObject();
+	}
+
 	value visit(const ast::number &n) { return Float(n.m_number); }
 
 	value visit(const ast::string &s) { return String(s.m_string); }
@@ -272,7 +289,7 @@ struct interpreter_visitor
 	value visit(const bool &b) { return Boolean(b); }
 	value visit(const ast::null &n) { return NullObject(); }
 
-	value visit(const ast::identifier &i) { return m_symbolTable->GetSymbol(i.m_identifier).m_value; }
+	value visit(const ast::identifier &i) { return m_symbolTable->Get(i.m_identifier).m_value; }
 
 	value visit(const ast::arithmetic_op &op)
 	{
@@ -402,22 +419,19 @@ struct interpreter_visitor
 	value visit(const ast::assignment &assignment)
 	{
 		auto rhs = visit(assignment.m_rhs);
-		auto symbol = m_symbolTable->GetSymbol(assignment.m_variableName.m_identifier);
-		symbol.m_value = rhs;
+		m_symbolTable->Assign(assignment.m_variableName.m_identifier, rhs);
 		return rhs;
 	}
 
-	SymbolTable *m_symbolTable;
+	std::shared_ptr<SymbolTable> m_symbolTable;
 };
 
-Interpreter::Interpreter() : m_symbolTable(std::make_unique<SymbolTable>()) {}
+Interpreter::Interpreter() {}
 
 bool Interpreter::Interpret(const ast::program &program)
 {
-	interpreter_visitor vis(m_symbolTable.get());
+	interpreter_visitor vis;
 	vis.visit(program);
-
-	m_symbolTable->DumpSymbols();
 
 	return false;
 }
