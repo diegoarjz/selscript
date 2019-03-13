@@ -167,7 +167,7 @@ struct unary_ops_dispatcher : public boost::static_visitor<builtin_value>
 	builtin_value operator()(const Operand &operand)
 	{
 		return Op::apply(operand);
-	};
+	}
 };
 
 template<class OP>
@@ -321,6 +321,8 @@ struct interpreter_visitor
 				return boost::apply_visitor(v, operand);
 			}
 		}
+
+		throw std::runtime_error("Unknown unary op");
 	}
 
 	builtin_value visit(const ast::comparison_op &op)
@@ -361,6 +363,8 @@ struct interpreter_visitor
 				return boost::apply_visitor(v, lhs);
 			}
 		}
+
+		throw std::runtime_error("Unknown comparison op");
 	}
 
 	builtin_value visit(const ast::logic_op &op)
@@ -374,7 +378,8 @@ struct interpreter_visitor
 			{
 				if (lhs_true)
 				{
-					return boost::apply_visitor(t, visit(op.m_rhs));
+					auto rhs = visit(op.m_rhs);
+					return boost::apply_visitor(t, rhs);
 				}
 				return false;
 			}
@@ -384,9 +389,12 @@ struct interpreter_visitor
 				{
 					return true;
 				}
-				return boost::apply_visitor(t, visit(op.m_rhs));
+				auto rhs = visit(op.m_rhs);
+				return boost::apply_visitor(t, rhs);
 			}
 		}
+
+		return true;
 	}
 
 	builtin_value visit(const ast::assignment &assignment)

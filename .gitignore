@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Build directory
+build/
+
+# Vim files
+*.swp
+*.swo
+
+# Compile commands
+compile_commands.json
