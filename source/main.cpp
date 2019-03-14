@@ -31,7 +31,6 @@ int main(int argc, char *argv[])
 	}
 
 	std::string s(std::begin(buffer), std::end(buffer));
-	std::cout << "Processing \n" << s << std::endl;
 
 	sscript::Parser p;
 	auto program = p.Parse(s);

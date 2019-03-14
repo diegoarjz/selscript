@@ -121,6 +121,61 @@ ast::if_statement &add_else_statement(ast::if_statement &ifStatement,
 	return ifStatement;
 }
 
+ast::statement make_for_loop(const boost::optional<boost::variant<ast::var_decl, ast::expression>> &init,
+                             const boost::optional<ast::expression> &condition,
+                             const boost::optional<ast::expression> &increment, const ast::statement body)
+{
+	ast::statement s;
+
+	ast::statement_block outerBlock;
+
+	if (init)
+	{
+		struct make_declaration : public boost::static_visitor<ast::declaration_types>
+		{
+			ast::declaration_types operator()(const ast::var_decl &d) { return d; }
+			ast::declaration_types operator()(const ast::expression &e)
+			{
+				ast::statement s;
+				s.m_statement = e;
+				return s;
+			}
+		};
+
+		make_declaration m;
+		ast::declaration decl;
+		decl.m_declaration = boost::apply_visitor(m, init.get());
+
+		outerBlock.m_declarations.push_back(decl);
+	}
+
+	ast::loop loop;
+
+	if (condition)
+	{
+		loop.m_condition = condition.get();
+	}
+
+	ast::statement_block innerBlock;
+	ast::declaration bodyDeclaration;
+	bodyDeclaration.m_declaration = body;
+	innerBlock.m_declarations.push_back(bodyDeclaration);
+
+	if (increment)
+	{
+		ast::declaration incrementDeclaration;
+		incrementDeclaration.m_declaration = ast::statement(increment.get());
+		innerBlock.m_declarations.push_back(incrementDeclaration);
+	}
+
+	loop.m_loopBody.m_statement = innerBlock;
+	ast::statement loopStatement(loop);
+	outerBlock.m_declarations.push_back(ast::declaration(loopStatement));
+	s.m_statement = outerBlock;
+
+	return s;
+}
+
 template<class Iterator>
 struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spirit::qi::space_type>
 {
@@ -152,8 +207,11 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spi
 		/*
 		 * statement -> expression_statement | if_statement | block
 		 */
-		statement %= if_statement | while_loop | expression_statement | statement_block;
+		statement %= if_statement | while_loop | for_loop | expression_statement | statement_block;
 
+		/*
+		 * statement_block -> "{" declaration* "}"
+		 */
 		statement_block %= '{' >> *declaration >> '}';
 
 		/*
@@ -172,6 +230,13 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spi
 		 *  while_loop -> "while" "(" expression ")" statement
 		 */
 		while_loop = qi::lit("while") >> '(' >> expression >> ')' >> statement;
+
+		/*
+		 * for_loop -> "for" "(" (var_decl | expression | ";")? expression? ";" expression? ")" statement
+		 */
+		for_loop =
+		    (qi::lit("for") >> '(' >> (var_decl | expression_statement | ';') >> -expression >> ';' >> -expression >>
+		     ')' >> statement)[_val = boost::phoenix::bind(make_for_loop, qi::_1, qi::_2, qi::_3, qi::_4)];
 
 		/*
 		 * expression -> assignment;
@@ -250,6 +315,7 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spi
 	rule<Iterator, ast::statement_block(), space_type> statement_block;
 	rule<Iterator, ast::if_statement(), space_type> if_statement;
 	rule<Iterator, ast::loop(), space_type> while_loop;
+	rule<Iterator, ast::statement(), space_type> for_loop;
 	rule<Iterator, ast::expression(), space_type> expression;
 	rule<Iterator, ast::expression(), space_type> expression_statement;
 	rule<Iterator, ast::expression(), space_type> assignment;

@@ -142,6 +142,9 @@ using statement_types = boost::variant<expression, boost::recursive_wrapper<stat
 struct statement
 {
 	statement_types m_statement;
+
+	statement() = default;
+	statement(const statement_types &s) : m_statement(s) {}
 };
 
 struct if_statement
@@ -171,6 +174,9 @@ using declaration_types = boost::variant<var_decl, statement>;
 struct declaration
 {
 	declaration_types m_declaration;
+
+	declaration() = default;
+	declaration(const declaration_types &decl) : m_declaration(decl) {}
 };
 
 struct statement_block

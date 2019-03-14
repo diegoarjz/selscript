@@ -276,7 +276,6 @@ struct interpreter_visitor
 			visit(declaration);
 		}
 
-		m_symbolTable->DumpSymbols();
 		m_symbolTable = previousSymbolTable;
 
 		return NullObject();
