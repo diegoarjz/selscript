@@ -22,6 +22,11 @@ BOOST_FUSION_ADAPT_STRUCT(sscript::ast::assignment, (sscript::ast::identifier, m
                           (sscript::ast::expression, m_rhs))
 BOOST_FUSION_ADAPT_STRUCT(sscript::ast::statement, (sscript::ast::statement_types, m_statement))
 BOOST_FUSION_ADAPT_STRUCT(sscript::ast::statement_block, (std::vector<sscript::ast::declaration>, m_declarations))
+BOOST_FUSION_ADAPT_STRUCT(sscript::ast::if_statement, (sscript::ast::expression, m_condition),
+                          (sscript::ast::statement, m_trueStatement),
+                          (boost::optional<sscript::ast::statement>, m_elseStatement))
+BOOST_FUSION_ADAPT_STRUCT(sscript::ast::loop, (sscript::ast::expression, m_condition),
+                          (sscript::ast::statement, m_loopBody))
 BOOST_FUSION_ADAPT_STRUCT(sscript::ast::var_decl, (sscript::ast::identifier, m_variableName),
                           (boost::optional<sscript::ast::expression>, m_rhs))
 BOOST_FUSION_ADAPT_STRUCT(sscript::ast::declaration, (sscript::ast::declaration_types, m_declaration))
@@ -101,6 +106,21 @@ ast::logic_op make_logic_op(const std::string &op, const ast::expression &lhs, c
 
 ast::null make_null() { return ast::null(); }
 
+ast::if_statement make_if_statement(const ast::expression &condition, const ast::statement &trueStatement)
+{
+	ast::if_statement ifStatement;
+	ifStatement.m_condition = condition;
+	ifStatement.m_trueStatement = trueStatement;
+	return ifStatement;
+}
+
+ast::if_statement &add_else_statement(ast::if_statement &ifStatement,
+                                      const boost::optional<ast::statement> &elseStatement)
+{
+	ifStatement.m_elseStatement = elseStatement;
+	return ifStatement;
+}
+
 template<class Iterator>
 struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spirit::qi::space_type>
 {
@@ -132,9 +152,9 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spi
 		/*
 		 * statement -> expression_statement | if_statement | block
 		 */
-		statement %= expression_statement | statement_block;
+		statement %= if_statement | while_loop | expression_statement | statement_block;
 
-		statement_block %= "{" >> *declaration >> "}";
+		statement_block %= '{' >> *declaration >> '}';
 
 		/*
 		 * expression_statement -> expression ";"
@@ -144,6 +164,14 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spi
 		/*
 		 * if_statement -> "if" "(" expression ")" statement ("else" statement)?
 		 */
+		if_statement = (qi::lit("if") >> '(' >> expression >> ')' >>
+		                statement)[_val = boost::phoenix::bind(make_if_statement, qi::_1, qi::_2)] >>
+		               -("else" >> statement[_val = boost::phoenix::bind(add_else_statement, qi::_val, qi::_1)]);
+
+		/*
+		 *  while_loop -> "while" "(" expression ")" statement
+		 */
+		while_loop = qi::lit("while") >> '(' >> expression >> ')' >> statement;
 
 		/*
 		 * expression -> assignment;
@@ -219,8 +247,9 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spi
 	rule<Iterator, ast::declaration(), space_type> declaration;
 	rule<Iterator, ast::var_decl(), space_type> var_decl;
 	rule<Iterator, ast::statement(), space_type> statement;
-	rule<Iterator, ast::statement_block, space_type> statement_block;
-	rule<Iterator, ast::statement(), space_type> if_statement;
+	rule<Iterator, ast::statement_block(), space_type> statement_block;
+	rule<Iterator, ast::if_statement(), space_type> if_statement;
+	rule<Iterator, ast::loop(), space_type> while_loop;
 	rule<Iterator, ast::expression(), space_type> expression;
 	rule<Iterator, ast::expression(), space_type> expression_statement;
 	rule<Iterator, ast::expression(), space_type> assignment;

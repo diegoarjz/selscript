@@ -134,11 +134,31 @@ struct assignment
 };
 
 struct statement_block;
-using statement_types = boost::variant<expression, boost::recursive_wrapper<statement_block>>;
+struct if_statement;
+struct loop;
+using statement_types = boost::variant<expression, boost::recursive_wrapper<statement_block>,
+                                       boost::recursive_wrapper<if_statement>, boost::recursive_wrapper<loop>>;
 
 struct statement
 {
 	statement_types m_statement;
+};
+
+struct if_statement
+{
+	expression m_condition;
+	statement m_trueStatement;
+	boost::optional<statement> m_elseStatement;
+
+	if_statement() = default;
+};
+
+struct loop
+{
+	expression m_condition;
+	statement m_loopBody;
+
+	loop() = default;
 };
 
 struct var_decl

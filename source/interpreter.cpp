@@ -282,6 +282,40 @@ struct interpreter_visitor
 		return NullObject();
 	}
 
+	value visit(const ast::if_statement &ifStatement)
+	{
+		auto condition = visit(ifStatement.m_condition);
+		is_true t;
+		auto conditionIsTrue = boost::apply_visitor(t, condition);
+
+		if (conditionIsTrue)
+		{
+			visit(ifStatement.m_trueStatement);
+		}
+		else if (ifStatement.m_elseStatement)
+		{
+			visit(ifStatement.m_elseStatement.get());
+		}
+
+		return NullObject();
+	}
+
+	value visit(const ast::loop &loop)
+	{
+		is_true t;
+		while (true)
+		{
+			auto condition = visit(loop.m_condition);
+			if (!boost::apply_visitor(t, condition))
+			{
+				break;
+			}
+			visit(loop.m_loopBody);
+		}
+
+		return NullObject();
+	}
+
 	value visit(const ast::number &n) { return Float(n.m_number); }
 
 	value visit(const ast::string &s) { return String(s.m_string); }
