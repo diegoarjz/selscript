@@ -9,7 +9,7 @@ class Parser
 public:
 	Parser();
 
-	ast::program Parse(const std::string &source);
+	ast::ProgramPtr Parse(const std::string &source);
 
 private:
 };

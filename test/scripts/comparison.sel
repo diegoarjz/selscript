@@ -1,0 +1,13 @@
+var true_equal = 1 == 1;
+var true_diff = 1 != 2;
+var true_greater = 2 > 1;
+var true_greater_equal = 2 >= 2;
+var true_less = 1 < 2;
+var true_less_equal = 1 <= 1;
+
+var false_equal = 1 == 2;
+var false_diff = 1 != 1;
+var false_greater = 2 > 3;
+var false_greater_equal = 2 >= 4;
+var false_less = 1 < 0;
+var false_less_equal = 2 <= 1;

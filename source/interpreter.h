@@ -12,6 +12,6 @@ class Interpreter
 public:
 	Interpreter();
 
-	bool Interpret(const ast::program &program);
+	bool Interpret(const ast::ProgramPtr &program);
 };
 }  // namespace sscript

@@ -1,10 +1,12 @@
 #include "interpreter.h"
 
+#include "ast_visitor.h"
 #include "symbol_table.h"
 #include "value.h"
 
 #include <cstdint>
 #include <iostream>
+#include <stack>
 
 namespace sscript
 {
@@ -208,263 +210,288 @@ struct is_true : public boost::static_visitor<bool>
 	bool operator()(const NullObject &n) { return false; }
 };
 
-struct interpreter_visitor
+struct interpreter_visitor : public AstVisitor
 {
 	interpreter_visitor() : m_symbolTable(std::make_shared<SymbolTable>("Global")) {}
-	~interpreter_visitor() { m_symbolTable->DumpSymbols(); }
-
-	template<typename Ret = void>
-	struct dispatcher_visitor : boost::static_visitor<Ret>
+	~interpreter_visitor()
 	{
-		dispatcher_visitor(interpreter_visitor *v) : m_interpreterVisitor(v) {}
-
-		template<typename T>
-		Ret operator()(const T &t)
+		m_symbolTable->DumpSymbols();
+		if (m_values.size() > 0)
 		{
-			return m_interpreterVisitor->visit(t);
-		}
-
-		interpreter_visitor *m_interpreterVisitor;
-	};
-
-	void visit(const ast::program &program)
-	{
-		for (const auto &declaration : program.m_declarations)
-		{
-			visit(declaration);
+			std::cout << "Value stack not empty" << std::endl;
+			value_visitor vis;
+			while (!m_values.empty())
+			{
+				std::cout << boost::apply_visitor(vis, m_values.top()) << std::endl;
+				m_values.pop();
+			}
 		}
 	}
 
-	void visit(const ast::declaration &declaration)
-	{
-		dispatcher_visitor<> decl(this);
-		boost::apply_visitor(decl, declaration.m_declaration);
-	}
+	void Visit(ast::NumberPtr n) override { PushValue(Float(n->GetNumber())); }
 
-	void visit(const ast::var_decl &decl)
+	void Visit(ast::StringPtr s) override { PushValue(String(s->GetString())); }
+
+	void Visit(ast::IdentifierPtr i) override { PushValue(m_symbolTable->Get(i->GetIdentifier()).m_value); }
+
+	void Visit(ast::BooleanPtr b) override { PushValue(Boolean(b->GetBoolean())); }
+
+	void Visit(ast::Nullptr n) override { PushValue(NullObject()); }
+
+	void Visit(ast::ArithmeticOpPtr op) override
 	{
-		if (decl.m_rhs)
+		op->GetRhs()->AcceptVisitor(this);
+		op->GetLhs()->AcceptVisitor(this);
+
+		auto lhs = PopValue();
+		auto rhs = PopValue();
+
+		switch (op->GetOperationType())
 		{
-			auto rhs = visit(decl.m_rhs.get());
-			m_symbolTable->Declare({decl.m_variableName.m_identifier, rhs});
+			case ast::ArithmeticOp::types::Add:
+			{
+				binary_op_dispatcher<bin_ops::add> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
+			case ast::ArithmeticOp::types::Sub:
+			{
+				binary_op_dispatcher<bin_ops::sub> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
+			case ast::ArithmeticOp::types::Mul:
+			{
+				binary_op_dispatcher<bin_ops::mul> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
+			case ast::ArithmeticOp::types::Div:
+			{
+				binary_op_dispatcher<bin_ops::div> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
 		}
-		else
+	}
+
+	void Visit(ast::UnaryPtr u) override
+	{
+		u->GetRhs()->AcceptVisitor(this);
+		auto rhs = PopValue();
+
+		switch (u->GetOperationType())
 		{
-			m_symbolTable->Declare({decl.m_variableName.m_identifier, value()});
+			case ast::Unary::types::Neg:
+			{
+				unary_ops_dispatcher<unary_ops::negate> v;
+				PushValue(boost::apply_visitor(v, rhs));
+				break;
+			}
+			case ast::Unary::types::Min:
+			{
+				unary_ops_dispatcher<unary_ops::minus> v;
+				PushValue(boost::apply_visitor(v, rhs));
+				break;
+			}
 		}
 	}
 
-	void visit(const ast::statement &statement)
+	void Visit(ast::ComparisonOpPtr op) override
 	{
-		dispatcher_visitor<value> v(this);
-		boost::apply_visitor(v, statement.m_statement);
-	}
+		op->GetRhs()->AcceptVisitor(this);
+		op->GetLhs()->AcceptVisitor(this);
+		auto lhs = PopValue();
+		auto rhs = PopValue();
 
-	value visit(const ast::expression &expresion)
-	{
-		dispatcher_visitor<value> v(this);
-		return boost::apply_visitor(v, expresion);
-	}
-
-	value visit(const ast::statement_block &block)
-	{
-		auto previousSymbolTable = m_symbolTable;
-		m_symbolTable = std::make_shared<SymbolTable>("Anonymous Block", previousSymbolTable);
-
-		for (const auto &declaration : block.m_declarations)
+		switch (op->GetOperationType())
 		{
-			visit(declaration);
+			case ast::ComparisonOp::types::Eq:
+			{
+				binary_op_dispatcher<bin_ops::eq> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
+			case ast::ComparisonOp::types::Ne:
+			{
+				binary_op_dispatcher<bin_ops::ne> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
+			case ast::ComparisonOp::types::Gt:
+			{
+				binary_op_dispatcher<bin_ops::gt> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
+			case ast::ComparisonOp::types::Gte:
+			{
+				binary_op_dispatcher<bin_ops::gte> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
+			case ast::ComparisonOp::types::Lt:
+			{
+				binary_op_dispatcher<bin_ops::lt> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
+			case ast::ComparisonOp::types::Lte:
+			{
+				binary_op_dispatcher<bin_ops::lte> v(lhs, rhs);
+				PushValue(boost::apply_visitor(v, lhs));
+				break;
+			}
 		}
-
-		m_symbolTable = previousSymbolTable;
-
-		return NullObject();
 	}
 
-	value visit(const ast::if_statement &ifStatement)
+	void Visit(ast::LogicOpPtr op) override
 	{
-		auto condition = visit(ifStatement.m_condition);
+		op->GetLhs()->AcceptVisitor(this);
+
+		auto lhs = PopValue();
+
 		is_true t;
-		auto conditionIsTrue = boost::apply_visitor(t, condition);
-
-		if (conditionIsTrue)
+		auto lhs_true = boost::apply_visitor(t, lhs);
+		switch (op->GetOperationType())
 		{
-			visit(ifStatement.m_trueStatement);
+			case ast::LogicOp::types::And:
+			{
+				if (lhs_true)
+				{
+					op->GetRhs()->AcceptVisitor(this);
+					auto rhs = PopValue();
+					PushValue(Boolean(boost::apply_visitor(t, rhs)));
+					return;
+				}
+				PushValue(Boolean(false));
+				break;
+			}
+			case ast::LogicOp::types::Or:
+			{
+				if (lhs_true)
+				{
+					PushValue(Boolean(true));
+					return;
+				}
+				op->GetRhs()->AcceptVisitor(this);
+				auto rhs = PopValue();
+				PushValue(Boolean(boost::apply_visitor(t, rhs)));
+				break;
+			}
 		}
-		else if (ifStatement.m_elseStatement)
-		{
-			visit(ifStatement.m_elseStatement.get());
-		}
-
-		return NullObject();
 	}
 
-	value visit(const ast::loop &loop)
+	void Visit(ast::AssignmentPtr a) override
+	{
+		a->GetRhs()->AcceptVisitor(this);
+		auto rhs = PopValue();
+		m_symbolTable->Assign(a->GetIdentifier()->GetIdentifier(), rhs);
+		PushValue(rhs);
+	}
+
+	void Visit(ast::ExpressionStatementPtr e) override
+	{
+		e->GetExpression()->AcceptVisitor(this);
+		PopValue();
+	}
+
+	void Visit(ast::IfStatementPtr i) override
+	{
+		i->GetCondition()->AcceptVisitor(this);
+		auto condition = PopValue();
+
+		auto falseStatement = i->GetFalseStatement();
+
+		is_true t;
+		if (boost::apply_visitor(t, condition))
+		{
+			i->GetTrueStatement()->AcceptVisitor(this);
+		}
+		else if (falseStatement)
+		{
+			falseStatement->AcceptVisitor(this);
+		}
+	}
+
+	void Visit(ast::LoopPtr l) override
 	{
 		is_true t;
 		while (true)
 		{
-			auto condition = visit(loop.m_condition);
+			l->GetCondition()->AcceptVisitor(this);
+			auto condition = PopValue();
 			if (!boost::apply_visitor(t, condition))
 			{
 				break;
 			}
-			visit(loop.m_loopBody);
+			l->GetBody()->AcceptVisitor(this);
 		}
-
-		return NullObject();
 	}
 
-	value visit(const ast::number &n) { return Float(n.m_number); }
-
-	value visit(const ast::string &s) { return String(s.m_string); }
-
-	value visit(const bool &b) { return Boolean(b); }
-	value visit(const ast::null &n) { return NullObject(); }
-
-	value visit(const ast::identifier &i) { return m_symbolTable->Get(i.m_identifier).m_value; }
-
-	value visit(const ast::arithmetic_op &op)
+	void Visit(ast::VarDeclPtr v) override
 	{
-		auto lhs = visit(op.m_lhs);
-		auto rhs = visit(op.m_rhs);
+		auto rhs = v->GetRhs();
 
-		switch (op.m_operation)
+		if (rhs)
 		{
-			case ast::arithmetic_op::types::Add:
-			{
-				binary_op_dispatcher<bin_ops::add> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
-			case ast::arithmetic_op::types::Sub:
-			{
-				binary_op_dispatcher<bin_ops::sub> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
-			case ast::arithmetic_op::types::Mul:
-			{
-				binary_op_dispatcher<bin_ops::mul> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
-			case ast::arithmetic_op::types::Div:
-			{
-				binary_op_dispatcher<bin_ops::div> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
+			rhs->AcceptVisitor(this);
+			m_symbolTable->Declare({v->GetIdentifier()->GetIdentifier(), PopValue()});
 		}
-
-		throw std::runtime_error("Unknown arithmetic_op");
-	}
-
-	value visit(const ast::unary &op)
-	{
-		auto operand = visit(op.m_operand);
-
-		switch (op.m_operation)
+		else
 		{
-			case ast::unary::types::Neg:
-			{
-				unary_ops_dispatcher<unary_ops::negate> v;
-				return boost::apply_visitor(v, operand);
-			}
-			case ast::unary::types::Min:
-			{
-				unary_ops_dispatcher<unary_ops::minus> v;
-				return boost::apply_visitor(v, operand);
-			}
+			m_symbolTable->Declare({v->GetIdentifier()->GetIdentifier(), NullObject()});
 		}
-
-		throw std::runtime_error("Unknown unary op");
 	}
 
-	value visit(const ast::comparison_op &op)
+	void Visit(ast::StatementBlockPtr b) override
 	{
-		auto lhs = visit(op.m_lhs);
-		auto rhs = visit(op.m_rhs);
+		auto previousSymbolTable = m_symbolTable;
+		m_symbolTable = std::make_shared<SymbolTable>("Anonymous Block", previousSymbolTable);
 
-		switch (op.m_operation)
+		for (const auto &statement : b->GetStatements())
 		{
-			case ast::comparison_op::types::Eq:
-			{
-				binary_op_dispatcher<bin_ops::eq> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
-			case ast::comparison_op::types::Ne:
-			{
-				binary_op_dispatcher<bin_ops::ne> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
-			case ast::comparison_op::types::Gt:
-			{
-				binary_op_dispatcher<bin_ops::gt> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
-			case ast::comparison_op::types::Gte:
-			{
-				binary_op_dispatcher<bin_ops::gte> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
-			case ast::comparison_op::types::Lt:
-			{
-				binary_op_dispatcher<bin_ops::lt> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
-			case ast::comparison_op::types::Lte:
-			{
-				binary_op_dispatcher<bin_ops::lte> v(lhs, rhs);
-				return boost::apply_visitor(v, lhs);
-			}
+			statement->AcceptVisitor(this);
 		}
 
-		throw std::runtime_error("Unknown comparison op");
+		m_symbolTable = previousSymbolTable;
 	}
 
-	value visit(const ast::logic_op &op)
+	void Visit(ast::ProgramPtr p) override
 	{
-		auto lhs = visit(op.m_lhs);
-		is_true t;
-		auto lhs_true = boost::apply_visitor(t, lhs);
-		switch (op.m_operation)
+		for (const auto &statement : p->GetStatements())
 		{
-			case ast::logic_op::types::And:
-			{
-				if (lhs_true)
-				{
-					auto rhs = visit(op.m_rhs);
-					return Boolean(boost::apply_visitor(t, rhs));
-				}
-				return Boolean(false);
-			}
-			case ast::logic_op::types::Or:
-			{
-				if (lhs_true)
-				{
-					return Boolean(true);
-				}
-				auto rhs = visit(op.m_rhs);
-				return Boolean(boost::apply_visitor(t, rhs));
-			}
+			statement->AcceptVisitor(this);
 		}
-
-		throw std::runtime_error("Unknown logic op");
 	}
 
-	value visit(const ast::assignment &assignment)
+	void PushValue(const value &v)
 	{
-		auto rhs = visit(assignment.m_rhs);
-		m_symbolTable->Assign(assignment.m_variableName.m_identifier, rhs);
-		return rhs;
+		// value_visitor vis;
+		// std::cout << "Pushing value " << boost::apply_visitor(vis, v) << std::endl;
+		m_values.push(v);
+	}
+
+	value PopValue()
+	{
+		value v = m_values.top();
+		m_values.pop();
+		// value_visitor vis;
+		// std::cout << "Popping value " << boost::apply_visitor(vis, v) << std::endl;
+		return v;
 	}
 
 	std::shared_ptr<SymbolTable> m_symbolTable;
+
+	std::stack<value> m_values;
 };
 
 Interpreter::Interpreter() {}
 
-bool Interpreter::Interpret(const ast::program &program)
+bool Interpreter::Interpret(const ast::ProgramPtr &program)
 {
 	interpreter_visitor vis;
-	vis.visit(program);
+	program->AcceptVisitor(&vis);
 
 	return false;
 }

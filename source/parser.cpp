@@ -8,14 +8,14 @@ namespace sscript
 {
 Parser::Parser() {}
 
-ast::program Parser::Parse(const std::string &source)
+ast::ProgramPtr Parser::Parse(const std::string &source)
 {
 	using parser_iterator = boost::spirit::line_pos_iterator<std::string::const_iterator>;
 	parser_iterator begin(std::cbegin(source));
 	parser_iterator end(std::cend(source));
 
 	grammar<parser_iterator> parser;
-	ast::program program;
+	ast::ProgramPtr program;
 	bool r = false;
 
 	try

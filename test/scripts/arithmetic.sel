@@ -1,0 +1,14 @@
+var float_add = 3.0 + 1.0;
+var float_sub = 2.0 - 1.0;
+var float_mul = 1.0 * 2.0;
+var float_div = 4.0 / 2.0;
+
+var float_mul_precedence = 3.0 + 1*2;
+var float_div_precedence = 3.0 + 4/2;
+var float_parenthesis = 4 / (1 + 1);
+
+var negative = -1;
+var positive = --1;
+
+var string_add = "abc" + "123";
+var string_mul = "abc" * 2;

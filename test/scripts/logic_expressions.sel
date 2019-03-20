@@ -1,0 +1,15 @@
+var and_true_true = true and true;
+var and_true_false = true and false;
+var and_false_true = false and true;
+var and_false_false = false and false;
+
+var or_true_true = true or true;
+var or_true_false = true or false;
+var or_false_true = false or true;
+var or_false_false = false or false;
+
+var and_precedence = false or true and false;
+var and_precedence_parenthesis = (false or true) and true;
+
+var negate_true = !true;
+var negate_false = !false;

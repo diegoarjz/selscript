@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ast.h"
+#include "grammar_helpers.h"
 
 #include <boost/phoenix/object/construct.hpp>
 #include <boost/phoenix/phoenix.hpp>
@@ -8,324 +9,165 @@
 
 using namespace boost::spirit::qi;
 
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::identifier, (std::string, m_identifier))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::number, (float, m_number))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::string, (std::string, m_string))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::null)
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::arithmetic_op, (sscript::ast::arithmetic_op::types, m_operation),
-                          (sscript::ast::expression, m_lhs), (sscript::ast::expression, m_rhs))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::comparison_op, (sscript::ast::comparison_op::types, m_operation),
-                          (sscript::ast::expression, m_lhs), (sscript::ast::expression, m_rhs))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::logic_op, (sscript::ast::logic_op::types, m_operation),
-                          (sscript::ast::expression, m_lhs), (sscript::ast::expression, m_rhs))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::assignment, (sscript::ast::identifier, m_variableName),
-                          (sscript::ast::expression, m_rhs))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::statement, (sscript::ast::statement_types, m_statement))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::statement_block, (std::vector<sscript::ast::declaration>, m_declarations))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::if_statement, (sscript::ast::expression, m_condition),
-                          (sscript::ast::statement, m_trueStatement),
-                          (boost::optional<sscript::ast::statement>, m_elseStatement))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::loop, (sscript::ast::expression, m_condition),
-                          (sscript::ast::statement, m_loopBody))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::var_decl, (sscript::ast::identifier, m_variableName),
-                          (boost::optional<sscript::ast::expression>, m_rhs))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::declaration, (sscript::ast::declaration_types, m_declaration))
-BOOST_FUSION_ADAPT_STRUCT(sscript::ast::program, (std::vector<sscript::ast::declaration>, m_declarations))
-
 namespace sscript
 {
-ast::unary make_unary_op(char op, const ast::expression &rhs)
-{
-	switch (op)
-	{
-		case '!':
-			return ast::unary(ast::unary::types::Neg, rhs);
-		case '-':
-			return ast::unary(ast::unary::types::Min, rhs);
-	}
-	throw std::runtime_error("Invalid operator");
-}
-
-ast::arithmetic_op make_arithmetic_op(char op, const ast::expression &lhs, const ast::expression &rhs)
-{
-	switch (op)
-	{
-		case '+':
-			return ast::arithmetic_op(ast::arithmetic_op::types::Add, lhs, rhs);
-		case '-':
-			return ast::arithmetic_op(ast::arithmetic_op::types::Sub, lhs, rhs);
-		case '*':
-			return ast::arithmetic_op(ast::arithmetic_op::types::Mul, lhs, rhs);
-		case '/':
-			return ast::arithmetic_op(ast::arithmetic_op::types::Div, lhs, rhs);
-	}
-	throw std::runtime_error("Invalid operator");
-}
-
-ast::comparison_op make_comparison_op(const std::string &op, const ast::expression &lhs, const ast::expression &rhs)
-{
-	if (op == "==")
-	{
-		return ast::comparison_op(ast::comparison_op::types::Eq, lhs, rhs);
-	}
-	if (op == "!=")
-	{
-		return ast::comparison_op(ast::comparison_op::types::Ne, lhs, rhs);
-	}
-	if (op == ">")
-	{
-		return ast::comparison_op(ast::comparison_op::types::Gt, lhs, rhs);
-	}
-	if (op == ">=")
-	{
-		return ast::comparison_op(ast::comparison_op::types::Gte, lhs, rhs);
-	}
-	if (op == "<")
-	{
-		return ast::comparison_op(ast::comparison_op::types::Lt, lhs, rhs);
-	}
-	if (op == "<=")
-	{
-		return ast::comparison_op(ast::comparison_op::types::Lte, lhs, rhs);
-	}
-	throw std::runtime_error("Invalid operator");
-}
-
-ast::logic_op make_logic_op(const std::string &op, const ast::expression &lhs, const ast::expression &rhs)
-{
-	if (op == "and")
-	{
-		return ast::logic_op(ast::logic_op::types::And, lhs, rhs);
-	}
-	if (op == "or")
-	{
-		return ast::logic_op(ast::logic_op::types::Or, lhs, rhs);
-	}
-	throw std::runtime_error("Invalid operator");
-}
-
-ast::null make_null() { return ast::null(); }
-
-ast::if_statement make_if_statement(const ast::expression &condition, const ast::statement &trueStatement)
-{
-	ast::if_statement ifStatement;
-	ifStatement.m_condition = condition;
-	ifStatement.m_trueStatement = trueStatement;
-	return ifStatement;
-}
-
-ast::if_statement &add_else_statement(ast::if_statement &ifStatement,
-                                      const boost::optional<ast::statement> &elseStatement)
-{
-	ifStatement.m_elseStatement = elseStatement;
-	return ifStatement;
-}
-
-ast::statement make_for_loop(const boost::optional<boost::variant<ast::var_decl, ast::expression>> &init,
-                             const boost::optional<ast::expression> &condition,
-                             const boost::optional<ast::expression> &increment, const ast::statement body)
-{
-	ast::statement s;
-
-	ast::statement_block outerBlock;
-
-	if (init)
-	{
-		struct make_declaration : public boost::static_visitor<ast::declaration_types>
-		{
-			ast::declaration_types operator()(const ast::var_decl &d) { return d; }
-			ast::declaration_types operator()(const ast::expression &e)
-			{
-				ast::statement s;
-				s.m_statement = e;
-				return s;
-			}
-		};
-
-		make_declaration m;
-		ast::declaration decl;
-		decl.m_declaration = boost::apply_visitor(m, init.get());
-
-		outerBlock.m_declarations.push_back(decl);
-	}
-
-	ast::loop loop;
-
-	if (condition)
-	{
-		loop.m_condition = condition.get();
-	}
-
-	ast::statement_block innerBlock;
-	ast::declaration bodyDeclaration;
-	bodyDeclaration.m_declaration = body;
-	innerBlock.m_declarations.push_back(bodyDeclaration);
-
-	if (increment)
-	{
-		ast::declaration incrementDeclaration;
-		incrementDeclaration.m_declaration = ast::statement(increment.get());
-		innerBlock.m_declarations.push_back(incrementDeclaration);
-	}
-
-	loop.m_loopBody.m_statement = innerBlock;
-	ast::statement loopStatement(loop);
-	outerBlock.m_declarations.push_back(ast::declaration(loopStatement));
-	s.m_statement = outerBlock;
-
-	return s;
-}
-
 template<class Iterator>
-struct grammar : boost::spirit::qi::grammar<Iterator, ast::program(), boost::spirit::qi::space_type>
+struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::spirit::qi::space_type>
 {
 	grammar() : grammar::base_type(program)
 	{
 		using namespace boost::spirit;
-		using namespace boost::phoenix;
+		using boost::phoenix::bind;
 		using boost::phoenix::construct;
 
-		identifier %= ((char_('_') | alpha) >> *(alnum | char_('_')));
-		number = float_[_val = construct<ast::number>(qi::_1)];
-		string = (('"' >> *(char_ - '"')) > '"')[_val = construct<ast::string>(qi::_1)];
+		identifier = (+(char_('_') | alpha) >> *(alnum | char_('_')))[_val = bind(make_identifier, qi::_1)];
+		number = float_[_val = bind(make_number, qi::_1)];
+		string = (('"' >> *(char_ - '"')) > '"')[_val = bind(make_string, qi::_1)];
 
 		/*
 		 * program -> declaration* EOF
 		 */
-		program %= *declaration >> eoi;
+		program = (*declaration >> eoi)[_val = bind(make_program, qi::_1)];
 
 		/*
 		 * declaration -> var_decl | statement
 		 */
-		declaration %= var_decl | statement;
+		declaration = var_decl | statement;
 
 		/*
 		 * var_decl -> "var" IDENTIFIER ( "=" expression )? ";"
 		 */
-		var_decl %= "var" > identifier >> -('=' > expression) > ';';
+		var_decl = ("var" > identifier >> -('=' > expression) > ';')[_val = bind(make_var_decl, qi::_1, qi::_2)];
 
 		/*
 		 * statement -> expression_statement | if_statement | block
 		 */
-		statement %= if_statement | while_loop | for_loop | expression_statement | statement_block;
+		statement = if_statement | while_loop | for_loop | expression_statement | statement_block;
 
 		/*
 		 * statement_block -> "{" declaration* "}"
 		 */
-		statement_block %= '{' >> *declaration >> '}';
+		statement_block = qi::char_('{')[_val = bind(make_statement_block)] >>
+		                  *(declaration[bind(add_statement, _val, qi::_1)]) >> '}';
 
 		/*
 		 * expression_statement -> expression ";"
 		 */
-		expression_statement %= expression > ';';
+		expression_statement = (expression[_val = bind(make_expression_statment, qi::_1)] > ';');
 
 		/*
 		 * if_statement -> "if" "(" expression ")" statement ("else" statement)?
 		 */
-		if_statement = (qi::lit("if") >> '(' >> expression >> ')' >>
-		                statement)[_val = boost::phoenix::bind(make_if_statement, qi::_1, qi::_2)] >>
-		               -("else" >> statement[_val = boost::phoenix::bind(add_else_statement, qi::_val, qi::_1)]);
+		if_statement =
+		    (qi::lit("if") >> '(' >> expression >> ')' >> statement)[_val = bind(make_if_statement, qi::_1, qi::_2)] >>
+		    -("else" >> statement[_val = bind(add_else_statement, _val, qi::_1)]);
 
 		/*
 		 *  while_loop -> "while" "(" expression ")" statement
 		 */
-		while_loop = qi::lit("while") >> '(' >> expression >> ')' >> statement;
+		while_loop =
+		    (qi::lit("while") >> '(' >> expression >> ')' >> statement)[_val = bind(make_while_loop, qi::_1, qi::_2)];
 
 		/*
 		 * for_loop -> "for" "(" (var_decl | expression | ";")? expression? ";" expression? ")" statement
 		 */
-		for_loop =
-		    (qi::lit("for") >> '(' >> (var_decl | expression_statement | ';') >> -expression >> ';' >> -expression >>
-		     ')' >> statement)[_val = boost::phoenix::bind(make_for_loop, qi::_1, qi::_2, qi::_3, qi::_4)];
+		for_loop = (qi::lit("for") >> '(' >> (var_decl | expression_statement | ';') >> -expression >> ';' >>
+		            -expression >> ')' >> statement)[_val = bind(make_for_loop, qi::_1, qi::_2, qi::_3, qi::_4)];
 
 		/*
 		 * expression -> assignment;
 		 */
-		expression %= assignment;
+		expression = assignment[_val = bind(make_expression, qi::_1)];
 
 		/*
 		 * assignment -> identifier "=" assignment | logic_or
 		 */
-		assignment %= (identifier >> '=' >> assignment) | logic_or;
+		assignment =
+		    (identifier >> '=' >> assignment)[_val = bind(make_assignment, qi::_1, qi::_2)] | logic_or[_val = qi::_1];
 
 		/*
 		 * logic_or -> logic_and ( "or" logic_and )*
 		 */
 		logic_or = logic_and[_val = qi::_1] >>
-		           *((qi::string("or") >> logic_and)[_val = boost::phoenix::bind(make_logic_op, qi::_1, _val, qi::_2)]);
+		           *((qi::string("or") >> logic_and)[_val = bind(make_logic_op, qi::_1, _val, qi::_2)]);
 
 		/*
 		 * logic_and -> equality ( "and" equality )*
 		 */
-		logic_and =
-		    equality[_val = qi::_1] >>
-		    *((qi::string("and") >> equality)[_val = boost::phoenix::bind(make_logic_op, qi::_1, _val, qi::_2)]);
+		logic_and = equality[_val = qi::_1] >>
+		            *((qi::string("and") >> equality)[_val = bind(make_logic_op, qi::_1, _val, qi::_2)]);
 
 		/*
 		 * equality -> comparison (("==" | "!=") comparison )*
 		 */
-		equality = comparison[_val = qi::_1] >>
-		           *(((qi::string("==") | qi::string("!=")) >>
-		              comparison)[_val = boost::phoenix::bind(make_comparison_op, qi::_1, _val, qi::_2)]);
+		equality = comparison[_val = qi::_1] >> *(((qi::string("==") | qi::string("!=")) >>
+		                                           comparison)[_val = bind(make_comparison_op, qi::_1, _val, qi::_2)]);
 
 		/*
 		 * comparison -> addition ((">" | ">=" | "<" | "<=") addition)*
 		 */
-		comparison = addition[_val = qi::_1] >>
-		             *(((qi::string(">") | qi::string(">=") | qi::string("<") | qi::string("<=")) >>
-		                addition)[_val = boost::phoenix::bind(make_comparison_op, qi::_1, _val, qi::_2)]);
+		comparison =
+		    addition[_val = qi::_1] >> *(((qi::string(">=") | qi::string(">") | qi::string("<=") | qi::string("<")) >>
+		                                  addition)[_val = bind(make_comparison_op, qi::_1, _val, qi::_2)]);
 
 		/*
 		 * addition -> multiplication (("+"|"-") multiplication)*
 		 */
-		addition = multiplication[_val = qi::_1] >>
-		           *(((char_('+') | char_('-')) >>
-		              multiplication)[_val = boost::phoenix::bind(make_arithmetic_op, qi::_1, _val, qi::_2)]);
+		addition =
+		    multiplication[_val = qi::_1] >>
+		    *(((char_('+') | char_('-')) >> multiplication)[_val = bind(make_arithmetic_op, qi::_1, _val, qi::_2)]);
 
 		/*
 		 * multiplication -> unary (("*"|"/") unary)*
 		 */
-		multiplication =
-		    unary[_val = qi::_1] >> *(((char_('*') | char_('/')) >>
-		                               unary)[_val = boost::phoenix::bind(make_arithmetic_op, qi::_1, _val, qi::_2)]);
+		multiplication = unary[_val = qi::_1] >>
+		                 *(((char_('*') | char_('/')) >> unary)[_val = bind(make_arithmetic_op, qi::_1, _val, qi::_2)]);
 
 		/*
 		 * unary -> (("!"|"-") unary) | primary
 		 */
-		unary = ((char_('!') | char_('-')) >> unary)[_val = boost::phoenix::bind(make_unary_op, qi::_1, qi::_2)] |
-		        primary[_val = qi::_1];
+		unary = ((char_('!') | char_('-')) >> unary)[_val = bind(make_unary_op, qi::_1, qi::_2)] |
+		        primary[_val = qi::_1];  // | call;
+
+		/*
+		 * call -> primary "(" arguments? ")"
+		 */
+		// call = (primary >> *('(' >> -arguments >> ')'));  //[_val = construct<ast::call>()];
 
 		/*
 		 * primary -> "true" | "false" | "null" | number | string | identifier
 		 *            | "(" expression ")"
 		 */
-		primary = qi::lit("true")[_val = true] | qi::lit("false")[_val = false] |
-		          qi::lit("null")[_val = boost::phoenix::bind(make_null)] |
-		          (number | string | identifier)[_val = qi::_1] | ('(' >> expression > ')');
+		primary = qi::lit("true")[_val = bind(make_true)] | qi::lit("false")[_val = bind(make_false)] |
+		          qi::lit("null")[_val = bind(make_null)] |
+		          (number[_val = qi::_1] | string[_val = qi::_1] | identifier[_val = qi::_1]) |
+		          ('(' >> expression[_val = qi::_1] > ')');
 	}
 
-	rule<Iterator, ast::identifier(), space_type> identifier;
-	rule<Iterator, ast::number(), space_type> number;
-	rule<Iterator, ast::string(), space_type> string;
+	rule<Iterator, ast::IdentifierPtr(), space_type> identifier;
+	rule<Iterator, ast::NumberPtr(), space_type> number;
+	rule<Iterator, ast::StringPtr(), space_type> string;
 
-	rule<Iterator, ast::program(), space_type> program;
-	rule<Iterator, ast::declaration(), space_type> declaration;
-	rule<Iterator, ast::var_decl(), space_type> var_decl;
-	rule<Iterator, ast::statement(), space_type> statement;
-	rule<Iterator, ast::statement_block(), space_type> statement_block;
-	rule<Iterator, ast::if_statement(), space_type> if_statement;
-	rule<Iterator, ast::loop(), space_type> while_loop;
-	rule<Iterator, ast::statement(), space_type> for_loop;
-	rule<Iterator, ast::expression(), space_type> expression;
-	rule<Iterator, ast::expression(), space_type> expression_statement;
-	rule<Iterator, ast::expression(), space_type> assignment;
-	rule<Iterator, ast::expression(), space_type> logic_or;
-	rule<Iterator, ast::expression(), space_type> logic_and;
-	rule<Iterator, ast::expression(), space_type> equality;
-	rule<Iterator, ast::expression(), space_type> comparison;
-	rule<Iterator, ast::expression(), space_type> addition;
-	rule<Iterator, ast::expression(), space_type> multiplication;
-	rule<Iterator, ast::expression(), space_type> unary;
-	rule<Iterator, ast::expression(), space_type> primary;
+	rule<Iterator, ast::ProgramPtr(), space_type> program;
+	rule<Iterator, ast::StatementPtr(), space_type> declaration;
+	rule<Iterator, ast::VarDeclPtr(), space_type> var_decl;
+	rule<Iterator, ast::StatementPtr(), space_type> statement;
+	rule<Iterator, ast::StatementBlockPtr(), space_type> statement_block;
+	rule<Iterator, ast::IfStatementPtr(), space_type> if_statement;
+	rule<Iterator, ast::LoopPtr(), space_type> while_loop;
+	rule<Iterator, ast::StatementPtr(), space_type> for_loop;
+	rule<Iterator, ast::ExpressionPtr(), space_type> expression;
+	rule<Iterator, ast::ExpressionStatementPtr(), space_type> expression_statement;
+	rule<Iterator, ast::ExpressionPtr(), space_type> assignment;
+	rule<Iterator, ast::ExpressionPtr(), space_type> logic_or;
+	rule<Iterator, ast::ExpressionPtr(), space_type> logic_and;
+	rule<Iterator, ast::ExpressionPtr(), space_type> equality;
+	rule<Iterator, ast::ExpressionPtr(), space_type> comparison;
+	rule<Iterator, ast::ExpressionPtr(), space_type> addition;
+	rule<Iterator, ast::ExpressionPtr(), space_type> multiplication;
+	rule<Iterator, ast::ExpressionPtr(), space_type> unary;
+	rule<Iterator, ast::ExpressionPtr(), space_type> call;
+	rule<Iterator, ast::ExpressionPtr(), space_type> primary;
+	rule<Iterator, void(), space_type> arguments;
 };
 }  // namespace sscript

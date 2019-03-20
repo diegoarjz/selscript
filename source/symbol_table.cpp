@@ -39,15 +39,6 @@ SymbolTable::SymbolEntry& SymbolTable::Get(const std::string& name)
 	throw std::runtime_error("Unable to find symbol");
 }
 
-struct value_visitor : boost::static_visitor<std::string>
-{
-	template<typename T>
-	std::string operator()(const T& v)
-	{
-		return v.ToString();
-	}
-};
-
 void SymbolTable::DumpSymbols() const
 {
 	value_visitor v;

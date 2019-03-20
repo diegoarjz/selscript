@@ -1,0 +1,7 @@
+var Null;
+var b = Null;
+var c = b;
+
+c = 123;
+var e;
+var d = e = 321;

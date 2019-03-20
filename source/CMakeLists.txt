@@ -1,8 +1,11 @@
 set(SEL_SCRIPT_SOURCES
     "main.cpp"
+    "ast.cpp"
     "symbol_table.cpp"
     "parser.cpp"
     "interpreter.cpp"
+    "grammar_helpers.cpp"
+    "ast_printer.cpp"
     )
 
 add_executable(sscript ${SEL_SCRIPT_SOURCES})
@@ -25,4 +28,10 @@ target_compile_options(
         -Wall
         -Werror
         -pedantic-errors
+)
+
+target_link_libraries(
+    sscript
+    PRIVATE
+        Boost::program_options
 )

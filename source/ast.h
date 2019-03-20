@@ -10,64 +10,90 @@
 
 namespace sscript
 {
+class AstVisitor;
+
 namespace ast
 {
-struct identifier
+class AstNode : public std::enable_shared_from_this<AstNode>
 {
-	std::string m_identifier;
+public:
+	AstNode() = default;
 
-	identifier() = default;
-	identifier(const std::string &name) : m_identifier(name) {}
-	identifier(const std::vector<char> &name) : m_identifier(name.begin(), name.end()) {}
+	AstNode(const AstNode &) = delete;
+	AstNode &operator=(const AstNode &) = delete;
+
+	virtual void AcceptVisitor(AstVisitor *) = 0;
+
+private:
 };
 
-struct number
+struct Expression : public AstNode
 {
+	Expression() = default;
+};
+using ExpressionPtr = std::shared_ptr<Expression>;
+
+struct Number : public Expression
+{
+	explicit Number(const float &f) : m_number(f) {}
+
+	const float &GetNumber() const { return m_number; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
 	float m_number;
-
-	number() = default;
-	number(const float &f) : m_number(f) {}
 };
+using NumberPtr = std::shared_ptr<Number>;
 
-struct string
+struct String : public Expression
 {
+	explicit String(const std::string &&s) : m_string(s) {}
+	explicit String(const std::vector<char> &s) : m_string(s.begin(), s.end()) {}
+
+	const std::string &GetString() const { return m_string; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
 	std::string m_string;
-
-	string() = default;
-	string(const std::string &name) : m_string(name) {}
-	string(const std::vector<char> &name) : m_string(name.begin(), name.end()) {}
 };
+using StringPtr = std::shared_ptr<String>;
 
-struct null
+struct Identifier : public Expression
 {
+	explicit Identifier(const std::string &i) : m_identifier(i) {}
+	explicit Identifier(const std::vector<char> &i) : m_identifier(i.begin(), i.end()) {}
+
+	const std::string &GetIdentifier() const { return m_identifier; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	std::string m_identifier;
 };
+using IdentifierPtr = std::shared_ptr<Identifier>;
 
-struct arithmetic_op;
-struct unary;
-struct comparison_op;
-struct logic_op;
-struct assignment;
-
-using expression = boost::variant<number, string, identifier, bool, null, boost::recursive_wrapper<arithmetic_op>,
-                                  boost::recursive_wrapper<unary>, boost::recursive_wrapper<comparison_op>,
-                                  boost::recursive_wrapper<logic_op>, boost::recursive_wrapper<assignment>>;
-
-struct unary
+struct Boolean : public Expression
 {
-	enum class types
-	{
-		Neg,
-		Min
-	};
+	explicit Boolean(const bool &b) : m_boolean(b) {}
 
-	unary() = default;
-	unary(const types &op, const expression &rhs) : m_operation(op), m_operand(rhs) {}
+	const bool &GetBoolean() const { return m_boolean; }
 
-	types m_operation;
-	expression m_operand;
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	bool m_boolean;
 };
+using BooleanPtr = std::shared_ptr<Boolean>;
 
-struct arithmetic_op
+struct Null : public Expression
+{
+	void AcceptVisitor(AstVisitor *v) override;
+};
+using Nullptr = std::shared_ptr<Null>;
+
+struct ArithmeticOp : public Expression
 {
 	enum class types
 	{
@@ -77,18 +103,46 @@ struct arithmetic_op
 		Div
 	};
 
-	arithmetic_op() = default;
-	arithmetic_op(const types op, const expression &lhs, const expression &rhs)
+	ArithmeticOp(const types op, const ExpressionPtr lhs, const ExpressionPtr rhs)
 	    : m_operation(op), m_lhs(lhs), m_rhs(rhs)
 	{
 	}
 
-	types m_operation;
-	expression m_lhs;
-	expression m_rhs;
-};
+	const types &GetOperationType() const { return m_operation; }
+	const ExpressionPtr &GetLhs() const { return m_lhs; }
+	const ExpressionPtr &GetRhs() const { return m_rhs; }
 
-struct comparison_op
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	types m_operation;
+	ExpressionPtr m_lhs;
+	ExpressionPtr m_rhs;
+};
+using ArithmeticOpPtr = std::shared_ptr<ArithmeticOp>;
+
+struct Unary : public Expression
+{
+	enum class types
+	{
+		Neg,
+		Min
+	};
+
+	Unary(const types &op, const ExpressionPtr &rhs) : m_operation(op), m_expression(rhs) {}
+
+	const types &GetOperationType() const { return m_operation; }
+	const ExpressionPtr &GetRhs() const { return m_expression; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	types m_operation;
+	const ExpressionPtr m_expression;
+};
+using UnaryPtr = std::shared_ptr<Unary>;
+
+struct ComparisonOp : public Expression
 {
 	enum class types
 	{
@@ -100,18 +154,24 @@ struct comparison_op
 		Lte
 	};
 
-	comparison_op() = default;
-	comparison_op(const types &op, const expression &lhs, const expression &rhs)
+	ComparisonOp(const types op, const ExpressionPtr lhs, const ExpressionPtr rhs)
 	    : m_operation(op), m_lhs(lhs), m_rhs(rhs)
 	{
 	}
 
-	types m_operation;
-	expression m_lhs;
-	expression m_rhs;
-};
+	const types &GetOperationType() const { return m_operation; }
+	const ExpressionPtr &GetLhs() const { return m_lhs; }
+	const ExpressionPtr &GetRhs() const { return m_rhs; }
+	void AcceptVisitor(AstVisitor *v) override;
 
-struct logic_op
+private:
+	types m_operation;
+	ExpressionPtr m_lhs;
+	ExpressionPtr m_rhs;
+};
+using ComparisonOpPtr = std::shared_ptr<ComparisonOp>;
+
+struct LogicOp : public Expression
 {
 	enum class types
 	{
@@ -119,75 +179,134 @@ struct logic_op
 		Or
 	};
 
-	logic_op() = default;
-	logic_op(const types &op, const expression &lhs, const expression &rhs) : m_operation(op), m_lhs(lhs), m_rhs(rhs) {}
+	LogicOp(const types op, const ExpressionPtr lhs, const ExpressionPtr rhs) : m_operation(op), m_lhs(lhs), m_rhs(rhs)
+	{
+	}
 
+	const types &GetOperationType() const { return m_operation; }
+	const ExpressionPtr &GetLhs() const { return m_lhs; }
+	const ExpressionPtr &GetRhs() const { return m_rhs; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
 	types m_operation;
-	expression m_lhs;
-	expression m_rhs;
+	ExpressionPtr m_lhs;
+	ExpressionPtr m_rhs;
 };
+using LogicOpPtr = std::shared_ptr<LogicOp>;
 
-struct assignment
+struct Assignment : public Expression
 {
-	identifier m_variableName;
-	expression m_rhs;
+	Assignment(std::shared_ptr<Identifier> identifier, ExpressionPtr rhs) : m_identifier(identifier), m_rhs(rhs) {}
+
+	const std::shared_ptr<Identifier> &GetIdentifier() const { return m_identifier; }
+	const ExpressionPtr &GetRhs() const { return m_rhs; }
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	std::shared_ptr<Identifier> m_identifier;
+	ExpressionPtr m_rhs;
 };
+using AssignmentPtr = std::shared_ptr<Assignment>;
 
-struct statement_block;
-struct if_statement;
-struct loop;
-using statement_types = boost::variant<expression, boost::recursive_wrapper<statement_block>,
-                                       boost::recursive_wrapper<if_statement>, boost::recursive_wrapper<loop>>;
-
-struct statement
+class Statement : public AstNode
 {
-	statement_types m_statement;
-
-	statement() = default;
-	statement(const statement_types &s) : m_statement(s) {}
+public:
+	Statement() = default;
 };
+using StatementPtr = std::shared_ptr<Statement>;
 
-struct if_statement
+struct ExpressionStatement : public Statement
 {
-	expression m_condition;
-	statement m_trueStatement;
-	boost::optional<statement> m_elseStatement;
+	ExpressionStatement(ExpressionPtr expression) : m_expression(expression) {}
 
-	if_statement() = default;
+	const ExpressionPtr &GetExpression() const { return m_expression; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	ExpressionPtr m_expression;
 };
+using ExpressionStatementPtr = std::shared_ptr<ExpressionStatement>;
 
-struct loop
+struct IfStatement : public Statement
 {
-	expression m_condition;
-	statement m_loopBody;
+	IfStatement(ExpressionPtr condition, StatementPtr trueStatement, StatementPtr falseStatement)
+	    : m_condition(condition), m_trueStatement(trueStatement), m_falseStatement(falseStatement)
+	{
+	}
 
-	loop() = default;
+	const ExpressionPtr &GetCondition() const { return m_condition; }
+	const StatementPtr &GetTrueStatement() const { return m_trueStatement; }
+	const StatementPtr &GetFalseStatement() const { return m_falseStatement; }
+	void SetFalseStatement(StatementPtr &falseStatement) { m_falseStatement = falseStatement; }
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	ExpressionPtr m_condition;
+	StatementPtr m_trueStatement;
+	StatementPtr m_falseStatement;
 };
+using IfStatementPtr = std::shared_ptr<IfStatement>;
 
-struct var_decl
+struct Loop : public Statement
 {
-	identifier m_variableName;
-	boost::optional<expression> m_rhs;
-};
+	Loop(ExpressionPtr condition, StatementPtr body) : m_condition(condition), m_body(body) {}
 
-using declaration_types = boost::variant<var_decl, statement>;
-struct declaration
+	const ExpressionPtr &GetCondition() const { return m_condition; }
+	const StatementPtr &GetBody() const { return m_body; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	ExpressionPtr m_condition;
+	StatementPtr m_body;
+};
+using LoopPtr = std::shared_ptr<Loop>;
+
+struct VarDecl : public Statement
 {
-	declaration_types m_declaration;
+	VarDecl(std::shared_ptr<Identifier> identifier, ExpressionPtr rhs) : m_identifier(identifier), m_rhs(rhs) {}
 
-	declaration() = default;
-	declaration(const declaration_types &decl) : m_declaration(decl) {}
+	const std::shared_ptr<Identifier> &GetIdentifier() const { return m_identifier; }
+	const ExpressionPtr &GetRhs() const { return m_rhs; }
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	std::shared_ptr<Identifier> m_identifier;
+	ExpressionPtr m_rhs;
 };
+using VarDeclPtr = std::shared_ptr<VarDecl>;
 
-struct statement_block
+struct StatementBlock : public Statement
 {
-	std::vector<declaration> m_declarations;
-};
+	StatementBlock() = default;
 
-struct program
-{
-	std::vector<declaration> m_declarations;
+	const std::vector<StatementPtr> &GetStatements() const { return m_statements; }
+	void AddStatement(const StatementPtr &statement) { m_statements.push_back(statement); }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	std::vector<StatementPtr> m_statements;
 };
+using StatementBlockPtr = std::shared_ptr<StatementBlock>;
+
+class Program : public AstNode
+{
+public:
+	Program() = default;
+	Program(const std::vector<StatementPtr> &statements) : m_statements(statements) {}
+
+	const std::vector<StatementPtr> &GetStatements() const { return m_statements; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	std::vector<StatementPtr> m_statements;
+};
+using ProgramPtr = std::shared_ptr<Program>;
 
 }  // namespace ast
 }  // namespace sscript

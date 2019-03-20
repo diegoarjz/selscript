@@ -48,5 +48,21 @@ struct NullObject : public BaseValue
 	std::string ToString() const { return "<" + m_typeName + ">"; }
 };
 
+struct Callable : public BaseValue
+{
+	Callable() : BaseValue("Callable") {}
+
+	std::string ToString() const { return "<" + m_typeName + ">"; }
+};
+
 using value = boost::variant<Boolean, Float, String, NullObject>;
+
+struct value_visitor : boost::static_visitor<std::string>
+{
+	template<typename T>
+	std::string operator()(const T &v)
+	{
+		return v.ToString();
+	}
+};
 }  // namespace sscript
