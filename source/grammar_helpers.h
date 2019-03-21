@@ -43,6 +43,8 @@ ast::VarDeclPtr make_var_decl(ast::IdentifierPtr &identifier, boost::optional<as
 
 ast::ProgramPtr make_program(const std::vector<ast::StatementPtr> &statements);
 
+ast::CallPtr make_call(const ast::ExpressionPtr &callee, boost::optional<std::vector<ast::ExpressionPtr>> args);
+
 ast::StatementPtr make_for_loop(
     const boost::optional<boost::variant<ast::VarDeclPtr, ast::ExpressionStatementPtr>> &init,
     const boost::optional<ast::ExpressionPtr> &condition, const boost::optional<ast::ExpressionPtr> &increment,

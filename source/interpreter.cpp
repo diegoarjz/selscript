@@ -457,6 +457,11 @@ struct interpreter_visitor : public AstVisitor
 		m_symbolTable = previousSymbolTable;
 	}
 
+	void Visit(ast::CallPtr) override
+	{
+		//
+	}
+
 	void Visit(ast::ProgramPtr p) override
 	{
 		for (const auto &statement : p->GetStatements())

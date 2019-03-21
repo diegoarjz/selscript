@@ -293,6 +293,22 @@ private:
 };
 using StatementBlockPtr = std::shared_ptr<StatementBlock>;
 
+struct Call : public Expression
+{
+	Call(const ExpressionPtr &callee) : m_callee(callee) {}
+
+	ExpressionPtr GetCallee() const { return m_callee; }
+	const std::vector<ExpressionPtr> &GetArguments() { return m_arguments; }
+	void SetArguments(const std::vector<ExpressionPtr> &args) { m_arguments = args; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	ExpressionPtr m_callee;
+	std::vector<ExpressionPtr> m_arguments;
+};
+using CallPtr = std::shared_ptr<Call>;
+
 class Program : public AstNode
 {
 public:

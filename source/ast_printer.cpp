@@ -144,6 +144,18 @@ void AstPrinter::Visit(ast::StatementBlockPtr b)
 	deindent();
 }
 
+void AstPrinter::Visit(ast::CallPtr c)
+{
+	indent();
+	std::cout << indentation() << "<Call>" << std::endl;
+	c->GetCallee()->AcceptVisitor(this);
+	for (auto &arg : c->GetArguments())
+	{
+		arg->AcceptVisitor(this);
+	}
+	deindent();
+}
+
 void AstPrinter::Visit(ast::ProgramPtr p)
 {
 	std::cout << "<Program>" << std::endl;

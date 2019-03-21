@@ -25,6 +25,7 @@ public:
 	void Visit(ast::LoopPtr) override;
 	void Visit(ast::VarDeclPtr) override;
 	void Visit(ast::StatementBlockPtr) override;
+	void Visit(ast::CallPtr) override;
 	void Visit(ast::ProgramPtr) override;
 
 private:

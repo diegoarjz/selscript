@@ -124,15 +124,19 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		                 *(((char_('*') | char_('/')) >> unary)[_val = bind(make_arithmetic_op, qi::_1, _val, qi::_2)]);
 
 		/*
-		 * unary -> (("!"|"-") unary) | primary
+		 * unary -> (("!"|"-") unary) | call
 		 */
-		unary = ((char_('!') | char_('-')) >> unary)[_val = bind(make_unary_op, qi::_1, qi::_2)] |
-		        primary[_val = qi::_1];  // | call;
+		unary = ((char_('!') | char_('-')) >> unary)[_val = bind(make_unary_op, qi::_1, qi::_2)] | call[_val = qi::_1];
 
 		/*
-		 * call -> primary "(" arguments? ")"
+		 * call -> primary ( "(" arguments? ")" )*
 		 */
-		// call = (primary >> *('(' >> -arguments >> ')'));  //[_val = construct<ast::call>()];
+		call = (primary[_val = qi::_1] >> *('(' >> (-arguments)[_val = bind(make_call, _val, qi::_1)] >> ')'));
+
+		/*
+		 * arguments -> expression ( "," expression )*
+		 */
+		arguments = expression % ',';
 
 		/*
 		 * primary -> "true" | "false" | "null" | number | string | identifier
@@ -168,6 +172,6 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 	rule<Iterator, ast::ExpressionPtr(), space_type> unary;
 	rule<Iterator, ast::ExpressionPtr(), space_type> call;
 	rule<Iterator, ast::ExpressionPtr(), space_type> primary;
-	rule<Iterator, void(), space_type> arguments;
+	rule<Iterator, std::vector<ast::ExpressionPtr>(), space_type> arguments;
 };
 }  // namespace sscript

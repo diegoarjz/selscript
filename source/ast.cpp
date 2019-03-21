@@ -48,6 +48,8 @@ void StatementBlock::AcceptVisitor(AstVisitor *v)
 	v->Visit(std::dynamic_pointer_cast<StatementBlock>(shared_from_this()));
 }
 
+void Call::AcceptVisitor(AstVisitor *v) { v->Visit(std::dynamic_pointer_cast<Call>(shared_from_this())); }
+
 void Program::AcceptVisitor(AstVisitor *v) { v->Visit(std::dynamic_pointer_cast<Program>(shared_from_this())); }
 }  // namespace ast
 }  // namespace sscript

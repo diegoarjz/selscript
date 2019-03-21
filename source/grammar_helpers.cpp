@@ -139,6 +139,20 @@ ast::ProgramPtr make_program(const std::vector<ast::StatementPtr> &statements)
 	return std::make_shared<ast::Program>(statements);
 }
 
+ast::CallPtr make_call(const ast::ExpressionPtr &callee, boost::optional<std::vector<ast::ExpressionPtr>> args)
+{
+	std::cout << "Make call: " << callee << std::endl;
+	auto call = std::make_shared<ast::Call>(callee);
+
+	if (args)
+	{
+		std::cout << " with args" << std::endl;
+		call->SetArguments(args.get());
+	}
+
+	return call;
+}
+
 ast::StatementPtr make_for_loop(
     const boost::optional<boost::variant<ast::VarDeclPtr, ast::ExpressionStatementPtr>> &init,
     const boost::optional<ast::ExpressionPtr> &condition, const boost::optional<ast::ExpressionPtr> &increment,
@@ -179,57 +193,6 @@ ast::StatementPtr make_for_loop(
 	outerBlock->AddStatement(loop);
 
 	return outerBlock;
-	/*
-	ast::statement s;
-
-	ast::statement_block outerBlock;
-
-	if (init)
-	{
-	    struct make_declaration : public boost::static_visitor<ast::declaration_types>
-	    {
-	        ast::declaration_types operator()(const ast::var_decl &d) { return d; }
-	        ast::declaration_types operator()(const ast::ExpressionPtr &e)
-	        {
-	            ast::statement s;
-	            s.m_statement = e;
-	            return s;
-	        }
-	    };
-
-	    make_declaration m;
-	    ast::declaration decl;
-	    decl.m_declaration = boost::apply_visitor(m, init.get());
-
-	    outerBlock.m_declarations.push_back(decl);
-	}
-
-	ast::loop loop;
-
-	if (condition)
-	{
-	    loop.m_condition = condition.get();
-	}
-
-	ast::statement_block innerBlock;
-	ast::declaration bodyDeclaration;
-	bodyDeclaration.m_declaration = body;
-	innerBlock.m_declarations.push_back(bodyDeclaration);
-
-	if (increment)
-	{
-	    ast::declaration incrementDeclaration;
-	    incrementDeclaration.m_declaration = ast::statement(increment.get());
-	    innerBlock.m_declarations.push_back(incrementDeclaration);
-	}
-
-	loop.m_loopBody.m_statement = innerBlock;
-	ast::statement loopStatement(loop);
-	outerBlock.m_declarations.push_back(ast::declaration(loopStatement));
-	s.m_statement = outerBlock;
-
-	return s;
-	*/
 }
 
 }  // namespace sscript
