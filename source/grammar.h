@@ -14,15 +14,39 @@ namespace sscript
 template<class Iterator>
 struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::spirit::qi::space_type>
 {
+	static auto kw(char const *keyword) -> boost::spirit::qi::rule<Iterator, void(), boost::spirit::qi::space_type>
+	{
+		using namespace boost::spirit;
+		return lexeme[(qi::string(+keyword) >> !(qi::alnum | qi::char_('_')))];
+	}
+
+	static auto typed_kw(char const *keyword)
+	    -> boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type>
+	{
+		using namespace boost::spirit;
+		return lexeme[(qi::string(keyword) >> !(qi::alnum | qi::char_('_')))[_val = qi::_1]];
+	}
+
 	grammar() : grammar::base_type(program)
 	{
 		using namespace boost::spirit;
 		using boost::phoenix::bind;
 		using boost::phoenix::construct;
 
-		identifier = (+(char_('_') | alpha) >> *(alnum | char_('_')))[_val = bind(make_identifier, qi::_1)];
+		kw_true = kw("true");
+		kw_false = kw("false");
+		kw_null = kw("null");
+		kw_var = kw("var");
+		kw_if = kw("if");
+		kw_else = kw("else");
+		kw_while = kw("while");
+		kw_for = kw("for");
+		kw_or = typed_kw("or");
+		kw_and = typed_kw("and");
+
+		identifier = lexeme[(+(char_('_') | alpha) >> *(alnum | char_('_')))[_val = bind(make_identifier, qi::_1)]];
 		number = float_[_val = bind(make_number, qi::_1)];
-		string = (('"' >> *(char_ - '"')) > '"')[_val = bind(make_string, qi::_1)];
+		string = lexeme[(('"' >> *(char_ - '"')) > '"')[_val = bind(make_string, qi::_1)]];
 
 		/*
 		 * program -> declaration* EOF
@@ -60,7 +84,7 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		 */
 		if_statement =
 		    (qi::lit("if") >> '(' >> expression >> ')' >> statement)[_val = bind(make_if_statement, qi::_1, qi::_2)] >>
-		    -("else" >> statement[_val = bind(add_else_statement, _val, qi::_1)]);
+		    -(qi::lit("else") >> statement[_val = bind(add_else_statement, _val, qi::_1)]);
 
 		/*
 		 *  while_loop -> "while" "(" expression ")" statement
@@ -142,11 +166,22 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		 * primary -> "true" | "false" | "null" | number | string | identifier
 		 *            | "(" expression ")"
 		 */
-		primary = qi::lit("true")[_val = bind(make_true)] | qi::lit("false")[_val = bind(make_false)] |
-		          qi::lit("null")[_val = bind(make_null)] |
+		primary = kw_true[_val = bind(make_true)] | kw_false[_val = bind(make_false)] |
+		          kw_null[_val = bind(make_null)] |
 		          (number[_val = qi::_1] | string[_val = qi::_1] | identifier[_val = qi::_1]) |
 		          ('(' >> expression[_val = qi::_1] > ')');
 	}
+
+	rule<Iterator, void(), space_type> kw_true;
+	rule<Iterator, void(), space_type> kw_false;
+	rule<Iterator, void(), space_type> kw_null;
+	rule<Iterator, void(), space_type> kw_var;
+	rule<Iterator, void(), space_type> kw_if;
+	rule<Iterator, void(), space_type> kw_else;
+	rule<Iterator, void(), space_type> kw_while;
+	rule<Iterator, void(), space_type> kw_for;
+	rule<Iterator, std::string(), space_type> kw_or;
+	rule<Iterator, std::string(), space_type> kw_and;
 
 	rule<Iterator, ast::IdentifierPtr(), space_type> identifier;
 	rule<Iterator, ast::NumberPtr(), space_type> number;

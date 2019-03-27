@@ -1,5 +1,7 @@
 #include "symbol_table.h"
 
+#include "base_value.h"
+
 namespace sscript
 {
 SymbolTable::SymbolTable(const std::string& tableName) : m_symbolTableName(tableName) {}
@@ -23,7 +25,7 @@ void SymbolTable::Declare(const SymbolEntry&& entry)
 	throw std::runtime_error("Symbol declaration shadows previous declaration");
 }
 
-void SymbolTable::Assign(const std::string& name, const value& v) { Get(name).m_value = v; }
+void SymbolTable::Assign(const std::string& name, const BaseValuePtr& v) { Get(name).m_value = v; }
 
 SymbolTable::SymbolEntry& SymbolTable::Get(const std::string& name)
 {
@@ -41,12 +43,10 @@ SymbolTable::SymbolEntry& SymbolTable::Get(const std::string& name)
 
 void SymbolTable::DumpSymbols() const
 {
-	value_visitor v;
-
 	std::cout << "Symbols for " << m_symbolTableName << ":" << std::endl;
 	for (auto symbol : m_symbols)
 	{
-		std::cout << symbol.first << ": " << boost::apply_visitor(v, symbol.second.m_value) << std::endl;
+		std::cout << symbol.first << ": " << symbol.second.m_value->ToString() << std::endl;
 	}
 }
 

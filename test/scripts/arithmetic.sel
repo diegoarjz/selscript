@@ -12,3 +12,15 @@ var positive = --1;
 
 var string_add = "abc" + "123";
 var string_mul = "abc" * 2;
+
+print("float_add = ", float_add);
+print("float_sub = ", float_sub);
+print("float_mul = ", float_mul);
+print("float_div = ", float_div);
+print("float_mul_precedence = ", float_mul_precedence);
+print("float_div_precedence = ", float_div_precedence);
+print("float_parenthesis = ", float_parenthesis);
+print("negative = ", negative);
+print("positive = ", positive);
+print("string_add = ", string_add);
+print("string_mul = ", string_mul);

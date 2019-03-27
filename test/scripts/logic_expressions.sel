@@ -13,3 +13,15 @@ var and_precedence_parenthesis = (false or true) and true;
 
 var negate_true = !true;
 var negate_false = !false;
+
+print("and_true_true = ", and_true_true);
+print("and_true_false = ", and_true_false);
+print("and_false_false = ", and_false_false);
+print("or_true_true = ", or_true_true);
+print("or_true_false = ", or_true_false);
+print("or_false_true = ", or_false_true);
+print("or_false_false = ", or_false_false);
+print("and_precedence = ", and_precedence);
+print("and_precedence_parenthesis = ", and_precedence_parenthesis);
+print("negate_true = ", negate_true);
+print("negate_false = ", negate_false);

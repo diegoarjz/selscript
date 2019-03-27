@@ -5,3 +5,7 @@ var c = b;
 c = 123;
 var e;
 var d = e = 321;
+
+print("c = ", c);
+print("e = ", e);
+print("d = ", d);

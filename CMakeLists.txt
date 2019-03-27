@@ -12,3 +12,7 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(source)
+
+find_package(GTest REQUIRED)
+enable_testing()
+add_subdirectory(test)

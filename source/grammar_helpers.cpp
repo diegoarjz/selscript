@@ -141,12 +141,10 @@ ast::ProgramPtr make_program(const std::vector<ast::StatementPtr> &statements)
 
 ast::CallPtr make_call(const ast::ExpressionPtr &callee, boost::optional<std::vector<ast::ExpressionPtr>> args)
 {
-	std::cout << "Make call: " << callee << std::endl;
 	auto call = std::make_shared<ast::Call>(callee);
 
 	if (args)
 	{
-		std::cout << " with args" << std::endl;
 		call->SetArguments(args.get());
 	}
 

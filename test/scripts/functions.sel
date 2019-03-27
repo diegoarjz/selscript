@@ -1,6 +1,1 @@
-
-empty_call();
-one_arg_call(1);
-multiple_args_call(1,2);
-
-multiple_calls(1)(2);
+print("print called");

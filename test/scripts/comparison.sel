@@ -1,13 +1,26 @@
-var true_equal = 1 == 1;
-var true_diff = 1 != 2;
-var true_greater = 2 > 1;
-var true_greater_equal = 2 >= 2;
-var true_less = 1 < 2;
-var true_less_equal = 1 <= 1;
+var True_equal = 1 == 1;
+var True_diff = 1 != 2;
+var True_greater = 2 > 1;
+var True_greater_equal = 2 >= 2;
+var True_less = 1 < 2;
+var True_less_equal = 1 <= 1;
 
-var false_equal = 1 == 2;
-var false_diff = 1 != 1;
-var false_greater = 2 > 3;
-var false_greater_equal = 2 >= 4;
-var false_less = 1 < 0;
-var false_less_equal = 2 <= 1;
+var False_equal = 1 == 2;
+var False_diff = 1 != 1;
+var False_greater = 2 > 3;
+var False_greater_equal = 2 >= 4;
+var False_less = 1 < 0;
+var False_less_equal = 2 <= 1;
+
+print("True_equal = ", True_equal);
+print("True_diff = ", True_diff);
+print("True_greater = ", True_greater);
+print("True_greater_equal = ", True_greater_equal);
+print("True_less = ", True_less);
+print("True_less_equal = ", True_less_equal);
+print("False_equal = ", False_equal);
+print("False_diff = ", False_diff);
+print("False_greater = ", False_greater);
+print("False_greater_equal = ", False_greater_equal);
+print("False_less = ", False_less);
+print("False_less_equal = ", False_less_equal);

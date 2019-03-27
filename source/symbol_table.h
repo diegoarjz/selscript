@@ -1,20 +1,22 @@
 #pragma once
 
 #include "ast.h"
-#include "value.h"
 
 #include <memory>
 #include <unordered_map>
 
 namespace sscript
 {
+struct BaseValue;
+using BaseValuePtr = std::shared_ptr<BaseValue>;
+
 class SymbolTable
 {
 public:
 	struct SymbolEntry
 	{
 		std::string m_symbolName;
-		value m_value;
+		BaseValuePtr m_value;
 	};
 
 	SymbolTable() = delete;
@@ -24,7 +26,7 @@ public:
 	SymbolTable &operator=(const SymbolTable &) = delete;
 
 	void Declare(const SymbolEntry &&entry);
-	void Assign(const std::string &name, const value &v);
+	void Assign(const std::string &name, const BaseValuePtr &v);
 	SymbolEntry &Get(const std::string &name);
 
 	void DumpSymbols() const;

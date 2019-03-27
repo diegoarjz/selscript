@@ -1,18 +1,15 @@
-var if_true = false;
-
 if (true)
 {
-    if_true = true;
+    print("Pass");
 }
-
-var if_false = true;
 
 if (false)
 {
+    print("Fail");
 }
 else
 {
-    if_false = false;
+    print("Pass");
 }
 
 var i=10;
@@ -21,8 +18,26 @@ while (i>0)
     i = i - 1;
 }
 
+if (i == 0)
+{
+    print("Pass");
+}
+else
+{
+    print("Fail");
+}
+
 var j = 0;
 for (var c = 0; c < 10; c = c +1)
 {
     j = j + 1;
+}
+
+if (j == 10)
+{
+    print("Pass");
+}
+else
+{
+    print("Fail");
 }

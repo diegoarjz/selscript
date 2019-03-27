@@ -1,8 +1,16 @@
 #include "interpreter.h"
 
 #include "ast_visitor.h"
+#include "base_value.h"
+#include "boolean_value.h"
+#include "builtin_callable.h"
+#include "builtin_functions.h"
+#include "callable.h"
+#include "float_value.h"
+#include "null_object_value.h"
+#include "string_value.h"
 #include "symbol_table.h"
-#include "value.h"
+#include "value_visitor.h"
 
 #include <cstdint>
 #include <iostream>
@@ -14,11 +22,17 @@ namespace bin_ops
 {
 struct add
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Float(lhs.m_value + rhs.m_value); }
-	static value apply(const String &lhs, const String &rhs) { return String(lhs.m_value + rhs.m_value); }
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Float>(lhs.m_value + rhs.m_value);
+	}
+	static BaseValuePtr apply(const String &lhs, const String &rhs)
+	{
+		return std::make_shared<String>(lhs.m_value + rhs.m_value);
+	}
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to add operands");
 	}
@@ -26,10 +40,13 @@ struct add
 
 struct sub
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Float(lhs.m_value - rhs.m_value); }
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Float>(lhs.m_value - rhs.m_value);
+	}
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to subtract operands");
 	}
@@ -37,20 +54,23 @@ struct sub
 
 struct mul
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Float(lhs.m_value * rhs.m_value); }
-	static value apply(const String &lhs, const Float &rhs)
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Float>(lhs.m_value * rhs.m_value);
+	}
+	static BaseValuePtr apply(const String &lhs, const Float &rhs)
 	{
 		std::string r;
 		for (auto i = 0u; i < static_cast<uint32_t>(rhs.m_value); ++i)
 		{
 			r += lhs.m_value;
 		}
-		return String(r);
+		return std::make_shared<String>(r);
 	}
-	static value apply(const Float &lhs, const String &rhs) { return apply(rhs, lhs); }
+	static BaseValuePtr apply(const Float &lhs, const String &rhs) { return apply(rhs, lhs); }
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to multiply operands");
 	}
@@ -58,10 +78,13 @@ struct mul
 
 struct div
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Float(lhs.m_value / rhs.m_value); }
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Float>(lhs.m_value / rhs.m_value);
+	}
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to divide operands");
 	}
@@ -69,12 +92,21 @@ struct div
 
 struct eq
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value == rhs.m_value); }
-	static value apply(const Boolean &lhs, const Boolean &rhs) { return Boolean(lhs.m_value == rhs.m_value); }
-	static value apply(const String &lhs, const String &rhs) { return Boolean(lhs.m_value == rhs.m_value); }
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value == rhs.m_value);
+	}
+	static BaseValuePtr apply(const Boolean &lhs, const Boolean &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value == rhs.m_value);
+	}
+	static BaseValuePtr apply(const String &lhs, const String &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value == rhs.m_value);
+	}
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -82,12 +114,21 @@ struct eq
 
 struct ne
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value != rhs.m_value); }
-	static value apply(const Boolean &lhs, const Boolean &rhs) { return Boolean(lhs.m_value != rhs.m_value); }
-	static value apply(const String &lhs, const String &rhs) { return Boolean(lhs.m_value != rhs.m_value); }
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value != rhs.m_value);
+	}
+	static BaseValuePtr apply(const Boolean &lhs, const Boolean &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value != rhs.m_value);
+	}
+	static BaseValuePtr apply(const String &lhs, const String &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value != rhs.m_value);
+	}
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -95,10 +136,13 @@ struct ne
 
 struct gt
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value > rhs.m_value); }
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value > rhs.m_value);
+	}
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -106,10 +150,13 @@ struct gt
 
 struct gte
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value >= rhs.m_value); }
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value >= rhs.m_value);
+	}
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -117,10 +164,13 @@ struct gte
 
 struct lt
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value < rhs.m_value); }
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value < rhs.m_value);
+	}
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -128,10 +178,13 @@ struct lt
 
 struct lte
 {
-	static value apply(const Float &lhs, const Float &rhs) { return Boolean(lhs.m_value <= rhs.m_value); }
+	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
+	{
+		return std::make_shared<Boolean>(lhs.m_value <= rhs.m_value);
+	}
 
 	template<typename LHS, typename RHS>
-	static value apply(const LHS &lhs, const RHS &rhs)
+	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
 		throw std::runtime_error("Unable to compare operands for equality");
 	}
@@ -142,10 +195,10 @@ namespace unary_ops
 {
 struct negate
 {
-	static value apply(const Boolean &b) { return Boolean(!b.m_value); }
+	static BaseValuePtr apply(const Boolean &b) { return std::make_shared<Boolean>(!b.m_value); }
 
 	template<typename T>
-	static value apply(const T &v)
+	static BaseValuePtr apply(const T &v)
 	{
 		throw std::runtime_error("Unable to negate operand");
 	}
@@ -153,10 +206,10 @@ struct negate
 
 struct minus
 {
-	static value apply(const Float &f) { return Float(-f.m_value); }
+	static BaseValuePtr apply(const Float &f) { return std::make_shared<Float>(-f.m_value); }
 
 	template<typename T>
-	static value apply(const T &v)
+	static BaseValuePtr apply(const T &v)
 	{
 		throw std::runtime_error("Unable to apply minus to operand");
 	}
@@ -164,79 +217,77 @@ struct minus
 }  // namespace unary_ops
 
 template<class Op>
-struct unary_ops_dispatcher : public boost::static_visitor<value>
+struct unary_ops_dispatcher : public ValueVisitor<BaseValuePtr>
 {
 	template<typename Operand>
-	value operator()(const Operand &operand)
+	BaseValuePtr operator()(const Operand &operand)
 	{
 		return Op::apply(operand);
 	}
 };
 
 template<class OP>
-struct binary_op_dispatcher : public boost::static_visitor<value>
+struct binary_op_dispatcher : public ValueVisitor<BaseValuePtr>
 {
-	value m_lhs;
-	value m_rhs;
+	BaseValuePtr m_lhs;
+	BaseValuePtr m_rhs;
 
-	binary_op_dispatcher(const value &lhs, const value &rhs) : m_lhs(lhs), m_rhs(rhs) {}
+	binary_op_dispatcher(const BaseValuePtr &lhs, const BaseValuePtr &rhs) : m_lhs(lhs), m_rhs(rhs) {}
 
 	template<typename LHS>
-	struct binary_op_rhs_dispatcher : public boost::static_visitor<value>
+	struct binary_op_rhs_dispatcher : public ValueVisitor<BaseValuePtr>
 	{
 		const LHS &m_lhs;
 		binary_op_rhs_dispatcher(const LHS &lhs) : m_lhs(lhs) {}
 
 		template<typename RHS>
-		value operator()(const RHS &rhs)
+		BaseValuePtr operator()(const RHS &rhs)
 		{
 			return OP::apply(m_lhs, rhs);
 		}
 	};
 
 	template<typename LHS>
-	value operator()(const LHS &lhs)
+	BaseValuePtr operator()(const LHS &lhs)
 	{
 		binary_op_rhs_dispatcher<LHS> rhs_visitor{lhs};
-		return boost::apply_visitor(rhs_visitor, m_rhs);
+		return apply_visitor(rhs_visitor, m_rhs);
 	}
 };
 
-struct is_true : public boost::static_visitor<bool>
+struct is_true : public ValueVisitor<bool>
 {
 	bool operator()(const Float &f) { return f.m_value; }
 	bool operator()(const Boolean &b) { return b.m_value; }
 	bool operator()(const String &s) { return s.m_value.size() != 0; }
 	bool operator()(const NullObject &n) { return false; }
+
+	template<typename T>
+	bool operator()(const T &t)
+	{
+		throw std::runtime_error("Unable to evaluate truthness");
+	}
 };
 
 struct interpreter_visitor : public AstVisitor
 {
-	interpreter_visitor() : m_symbolTable(std::make_shared<SymbolTable>("Global")) {}
-	~interpreter_visitor()
+	interpreter_visitor() : m_symbolTable(std::make_shared<SymbolTable>("Global"))
 	{
-		m_symbolTable->DumpSymbols();
-		if (m_values.size() > 0)
-		{
-			std::cout << "Value stack not empty" << std::endl;
-			value_visitor vis;
-			while (!m_values.empty())
-			{
-				std::cout << boost::apply_visitor(vis, m_values.top()) << std::endl;
-				m_values.pop();
-			}
-		}
+		m_symbolTable->Declare({"print", register_callable(make_function(print))});
+		m_symbolTable->Declare({"time", register_callable(make_function(time))});
 	}
 
-	void Visit(ast::NumberPtr n) override { PushValue(Float(n->GetNumber())); }
+	~interpreter_visitor() {}
 
-	void Visit(ast::StringPtr s) override { PushValue(String(s->GetString())); }
+	void Visit(ast::NumberPtr n) override { PushValue(std::make_shared<Float>(n->GetNumber())); }
+
+	void Visit(ast::StringPtr s) override { PushValue(std::make_shared<String>(s->GetString())); }
 
 	void Visit(ast::IdentifierPtr i) override { PushValue(m_symbolTable->Get(i->GetIdentifier()).m_value); }
 
-	void Visit(ast::BooleanPtr b) override { PushValue(Boolean(b->GetBoolean())); }
+	void Visit(ast::BooleanPtr b) override { PushValue(std::make_shared<Boolean>(b->GetBoolean())); }
 
-	void Visit(ast::Nullptr n) override { PushValue(NullObject()); }
+	void Visit(ast::Nullptr n) override { PushValue(std::make_shared<NullObject>()); }
 
 	void Visit(ast::ArithmeticOpPtr op) override
 	{
@@ -251,25 +302,25 @@ struct interpreter_visitor : public AstVisitor
 			case ast::ArithmeticOp::types::Add:
 			{
 				binary_op_dispatcher<bin_ops::add> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 			case ast::ArithmeticOp::types::Sub:
 			{
 				binary_op_dispatcher<bin_ops::sub> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 			case ast::ArithmeticOp::types::Mul:
 			{
 				binary_op_dispatcher<bin_ops::mul> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 			case ast::ArithmeticOp::types::Div:
 			{
 				binary_op_dispatcher<bin_ops::div> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 		}
@@ -285,13 +336,13 @@ struct interpreter_visitor : public AstVisitor
 			case ast::Unary::types::Neg:
 			{
 				unary_ops_dispatcher<unary_ops::negate> v;
-				PushValue(boost::apply_visitor(v, rhs));
+				PushValue(apply_visitor(v, rhs));
 				break;
 			}
 			case ast::Unary::types::Min:
 			{
 				unary_ops_dispatcher<unary_ops::minus> v;
-				PushValue(boost::apply_visitor(v, rhs));
+				PushValue(apply_visitor(v, rhs));
 				break;
 			}
 		}
@@ -309,37 +360,37 @@ struct interpreter_visitor : public AstVisitor
 			case ast::ComparisonOp::types::Eq:
 			{
 				binary_op_dispatcher<bin_ops::eq> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 			case ast::ComparisonOp::types::Ne:
 			{
 				binary_op_dispatcher<bin_ops::ne> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 			case ast::ComparisonOp::types::Gt:
 			{
 				binary_op_dispatcher<bin_ops::gt> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 			case ast::ComparisonOp::types::Gte:
 			{
 				binary_op_dispatcher<bin_ops::gte> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 			case ast::ComparisonOp::types::Lt:
 			{
 				binary_op_dispatcher<bin_ops::lt> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 			case ast::ComparisonOp::types::Lte:
 			{
 				binary_op_dispatcher<bin_ops::lte> v(lhs, rhs);
-				PushValue(boost::apply_visitor(v, lhs));
+				PushValue(apply_visitor(v, lhs));
 				break;
 			}
 		}
@@ -352,7 +403,7 @@ struct interpreter_visitor : public AstVisitor
 		auto lhs = PopValue();
 
 		is_true t;
-		auto lhs_true = boost::apply_visitor(t, lhs);
+		auto lhs_true = apply_visitor(t, lhs);
 		switch (op->GetOperationType())
 		{
 			case ast::LogicOp::types::And:
@@ -361,22 +412,22 @@ struct interpreter_visitor : public AstVisitor
 				{
 					op->GetRhs()->AcceptVisitor(this);
 					auto rhs = PopValue();
-					PushValue(Boolean(boost::apply_visitor(t, rhs)));
+					PushValue(std::make_shared<Boolean>(apply_visitor(t, rhs)));
 					return;
 				}
-				PushValue(Boolean(false));
+				PushValue(std::make_shared<Boolean>(false));
 				break;
 			}
 			case ast::LogicOp::types::Or:
 			{
 				if (lhs_true)
 				{
-					PushValue(Boolean(true));
+					PushValue(std::make_shared<Boolean>(true));
 					return;
 				}
 				op->GetRhs()->AcceptVisitor(this);
 				auto rhs = PopValue();
-				PushValue(Boolean(boost::apply_visitor(t, rhs)));
+				PushValue(std::make_shared<Boolean>(apply_visitor(t, rhs)));
 				break;
 			}
 		}
@@ -404,7 +455,7 @@ struct interpreter_visitor : public AstVisitor
 		auto falseStatement = i->GetFalseStatement();
 
 		is_true t;
-		if (boost::apply_visitor(t, condition))
+		if (apply_visitor(t, condition))
 		{
 			i->GetTrueStatement()->AcceptVisitor(this);
 		}
@@ -421,7 +472,7 @@ struct interpreter_visitor : public AstVisitor
 		{
 			l->GetCondition()->AcceptVisitor(this);
 			auto condition = PopValue();
-			if (!boost::apply_visitor(t, condition))
+			if (!apply_visitor(t, condition))
 			{
 				break;
 			}
@@ -440,7 +491,7 @@ struct interpreter_visitor : public AstVisitor
 		}
 		else
 		{
-			m_symbolTable->Declare({v->GetIdentifier()->GetIdentifier(), NullObject()});
+			m_symbolTable->Declare({v->GetIdentifier()->GetIdentifier(), std::make_shared<NullObject>()});
 		}
 	}
 
@@ -457,9 +508,29 @@ struct interpreter_visitor : public AstVisitor
 		m_symbolTable = previousSymbolTable;
 	}
 
-	void Visit(ast::CallPtr) override
+	void Visit(ast::CallPtr c) override
 	{
-		//
+		c->GetCallee()->AcceptVisitor(this);
+		auto callee = PopValue();
+
+		std::vector<BaseValuePtr> args;
+		for (auto &a : c->GetArguments())
+		{
+			a->AcceptVisitor(this);
+			args.push_back(PopValue());
+		}
+
+		try
+		{
+			std::dynamic_pointer_cast<Callable>(callee)->Call(args);
+		}
+		catch (BaseValuePtr &f)
+		{
+			PushValue(f);
+			return;
+		}
+
+		PushValue(std::make_shared<NullObject>());
 	}
 
 	void Visit(ast::ProgramPtr p) override
@@ -470,25 +541,25 @@ struct interpreter_visitor : public AstVisitor
 		}
 	}
 
-	void PushValue(const value &v)
+	void PushValue(const BaseValuePtr &v)
 	{
 		// value_visitor vis;
-		// std::cout << "Pushing value " << boost::apply_visitor(vis, v) << std::endl;
+		// std::cout << "Pushing value " << apply_visitor(vis, v) << std::endl;
 		m_values.push(v);
 	}
 
-	value PopValue()
+	BaseValuePtr PopValue()
 	{
-		value v = m_values.top();
+		BaseValuePtr v = m_values.top();
 		m_values.pop();
 		// value_visitor vis;
-		// std::cout << "Popping value " << boost::apply_visitor(vis, v) << std::endl;
+		// std::cout << "Popping value " << apply_visitor(vis, v) << std::endl;
 		return v;
 	}
 
 	std::shared_ptr<SymbolTable> m_symbolTable;
 
-	std::stack<value> m_values;
+	std::stack<BaseValuePtr> m_values;
 };
 
 Interpreter::Interpreter() {}

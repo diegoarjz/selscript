@@ -13,11 +13,6 @@ void run(sscript::ast::ProgramPtr program);
 
 int main(int argc, char *argv[])
 {
-	/*
-	std::cout << "Program has " << program->GetStatements().size() << " statements" << std::endl;
-
-	*/
-
 	namespace po = boost::program_options;
 
 	std::string scriptFile;
