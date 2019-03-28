@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ast.h"
+#include "intermediate/ast.h"
 
 namespace sscript
 {

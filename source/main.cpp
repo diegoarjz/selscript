@@ -1,6 +1,6 @@
-#include "ast_printer.h"
-#include "interpreter.h"
-#include "parser.h"
+#include "intermediate/ast_printer.h"
+#include "interpreter/interpreter.h"
+#include "parser/parser.h"
 
 #include <boost/program_options.hpp>
 

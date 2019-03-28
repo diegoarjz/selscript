@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ast.h"
 #include "grammar_helpers.h"
+#include "intermediate/ast.h"
 
 #include <boost/phoenix/object/construct.hpp>
 #include <boost/phoenix/phoenix.hpp>

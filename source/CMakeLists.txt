@@ -1,19 +1,11 @@
 set(SEL_SCRIPT_SOURCES
-    "ast.cpp"
-    "base_value.cpp"
-    "boolean_value.cpp"
-    "builtin_functions.cpp"
-    "callable.cpp"
-    "float_value.cpp"
-    "functional.cpp"
-    "null_object_value.cpp"
-    "string_value.cpp"
-    "symbol_table.cpp"
-    "parser.cpp"
-    "interpreter.cpp"
-    "grammar_helpers.cpp"
-    "ast_printer.cpp"
+    "version.cpp"
     )
+
+add_subdirectory(intermediate)
+add_subdirectory(value)
+add_subdirectory(parser)
+add_subdirectory(interpreter)
 
 add_library(selscript ${SEL_SCRIPT_SOURCES})
 
@@ -40,7 +32,10 @@ target_compile_options(
 target_link_libraries(
     selscript
     PRIVATE
-        Boost::program_options
+        parser
+        value
+        intermediate
+        interpreter
 )
 
 # SSCRIPT EXECUTABLE

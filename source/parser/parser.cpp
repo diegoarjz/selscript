@@ -2,6 +2,8 @@
 
 #include "grammar.h"
 
+#include "intermediate/ast.h"
+
 #include <boost/spirit/include/support_line_pos_iterator.hpp>
 
 namespace sscript

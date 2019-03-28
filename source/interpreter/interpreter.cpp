@@ -1,16 +1,16 @@
 #include "interpreter.h"
 
-#include "ast_visitor.h"
-#include "base_value.h"
-#include "boolean_value.h"
-#include "builtin_callable.h"
-#include "builtin_functions.h"
-#include "callable.h"
-#include "float_value.h"
-#include "null_object_value.h"
-#include "string_value.h"
+#include "intermediate/ast_visitor.h"
 #include "symbol_table.h"
-#include "value_visitor.h"
+#include "value/base_value.h"
+#include "value/boolean_value.h"
+#include "value/builtin_callable.h"
+#include "value/builtin_functions.h"
+#include "value/callable.h"
+#include "value/float_value.h"
+#include "value/null_object_value.h"
+#include "value/string_value.h"
+#include "value/value_visitor.h"
 
 #include <cstdint>
 #include <iostream>

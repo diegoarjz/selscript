@@ -1,9 +1,15 @@
 #pragma once
 
-#include "ast.h"
+#include <memory>
 
 namespace sscript
 {
+namespace ast
+{
+class Program;
+using ProgramPtr = std::shared_ptr<Program>;
+}  // namespace ast
+
 class Parser
 {
 public:

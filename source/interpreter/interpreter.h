@@ -1,12 +1,17 @@
 #pragma once
 
-#include "ast.h"
 #include "symbol_table.h"
 
 #include <memory>
 
 namespace sscript
 {
+namespace ast
+{
+class Program;
+using ProgramPtr = std::shared_ptr<Program>;
+}  // namespace ast
+
 class Interpreter
 {
 public:

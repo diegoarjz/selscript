@@ -1,6 +1,8 @@
 #include "symbol_table.h"
 
-#include "base_value.h"
+#include "value/base_value.h"
+
+#include <iostream>
 
 namespace sscript
 {
