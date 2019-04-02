@@ -5,24 +5,26 @@
 #include "null_object_value.h"
 #include "string_value.h"
 
+#include "interpreter/interpreter_visitor.h"
+#include "interpreter/symbol_table.h"
+
 #include <iostream>
 
 namespace sscript
 {
-Callable::Callable() : BaseValue("Callable") {}
+Callable::Callable() : BaseValue("Callable"), m_variadic(false) {}
 Callable::~Callable() {}
 
 std::string Callable::ToString() const { return "<" + m_typeName + ">"; }
 void Callable::AcceptVisitor(ValueVisitorBase *v) { v->Visit(this); }
 
-struct visitor : ValueVisitor<std::string>
+void Callable::Call(interpreter_visitor *interpreter, const std::vector<BaseValuePtr> &args)
 {
-	template<typename T>
-	std::string operator()(T &v)
+	for (std::size_t i = 0; i < GetArity(); ++i)
 	{
-		return v.ToString();
+		interpreter->GetCurrentSymbolTable()->Declare({m_parameterNames[i], args[i]});
 	}
-};
 
-void Callable::Call(const std::vector<BaseValuePtr> &args) {}
+	m_callableBody->AcceptVisitor(interpreter);
+}
 }  // namespace sscript

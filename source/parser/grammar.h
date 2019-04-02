@@ -43,6 +43,8 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		kw_for = kw("for");
 		kw_or = typed_kw("or");
 		kw_and = typed_kw("and");
+		kw_function = kw("function");
+		kw_return = kw("return");
 
 		identifier = lexeme[(+(char_('_') | alpha) >> *(alnum | char_('_')))[_val = bind(make_identifier, qi::_1)]];
 		number = float_[_val = bind(make_number, qi::_1)];
@@ -56,7 +58,23 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		/*
 		 * declaration -> var_decl | statement
 		 */
-		declaration = var_decl | statement;
+		declaration = function_declaration | var_decl | statement;
+
+		/*
+		 * function_declaration -> "function" identifier "(" parameters? ")" statement_block
+		 */
+		function_declaration = (kw_function >> identifier >> '(' >> -parameters >> ')' >>
+		                        statement_block)[_val = bind(make_function, qi::_1, qi::_2, qi::_3)];
+
+		/*
+		 * parameters -> expression ( "," expression )*
+		 */
+		parameters = identifier % ',';
+
+		/*
+		 * return_statement -> "return" expression? ';'
+		 */
+		return_statement = (kw_return >> -expression >> ';')[_val = bind(make_return_statement, qi::_1)];
 
 		/*
 		 * var_decl -> "var" IDENTIFIER ( "=" expression )? ";"
@@ -66,7 +84,7 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		/*
 		 * statement -> expression_statement | if_statement | block
 		 */
-		statement = if_statement | while_loop | for_loop | expression_statement | statement_block;
+		statement = if_statement | while_loop | for_loop | return_statement | expression_statement | statement_block;
 
 		/*
 		 * statement_block -> "{" declaration* "}"
@@ -180,6 +198,8 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 	rule<Iterator, void(), space_type> kw_else;
 	rule<Iterator, void(), space_type> kw_while;
 	rule<Iterator, void(), space_type> kw_for;
+	rule<Iterator, void(), space_type> kw_function;
+	rule<Iterator, void(), space_type> kw_return;
 	rule<Iterator, std::string(), space_type> kw_or;
 	rule<Iterator, std::string(), space_type> kw_and;
 
@@ -206,7 +226,10 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 	rule<Iterator, ast::ExpressionPtr(), space_type> multiplication;
 	rule<Iterator, ast::ExpressionPtr(), space_type> unary;
 	rule<Iterator, ast::ExpressionPtr(), space_type> call;
-	rule<Iterator, ast::ExpressionPtr(), space_type> primary;
 	rule<Iterator, std::vector<ast::ExpressionPtr>(), space_type> arguments;
+	rule<Iterator, ast::FunctionDeclarationPtr(), space_type> function_declaration;
+	rule<Iterator, std::vector<ast::IdentifierPtr>(), space_type> parameters;
+	rule<Iterator, ast::ReturnPtr(), space_type> return_statement;
+	rule<Iterator, ast::ExpressionPtr(), space_type> primary;
 };
 }  // namespace sscript

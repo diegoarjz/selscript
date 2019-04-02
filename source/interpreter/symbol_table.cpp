@@ -15,21 +15,28 @@ SymbolTable::SymbolTable(const std::string& tableName, std::shared_ptr<SymbolTab
 
 void SymbolTable::Declare(const SymbolEntry&& entry)
 {
+	SymbolEntry prevDecl;
 	try
 	{
-		Get(entry.m_symbolName);
+		prevDecl = findSymbol(entry.m_symbolName);
 	}
-	catch (std::runtime_error e)
+	catch (SymbolNotFoundException& e)
 	{
 		m_symbols[entry.m_symbolName] = entry;
 		return;
 	}
-	throw std::runtime_error("Symbol declaration shadows previous declaration");
+	throw SymbolShadowingException(entry.m_symbolName, prevDecl);
 }
 
-void SymbolTable::Assign(const std::string& name, const BaseValuePtr& v) { Get(name).m_value = v; }
+void SymbolTable::Assign(const std::string& name, const BaseValuePtr& v)
+{
+	auto& symbol = findSymbol(name);
+	symbol.m_value = v;
+}
 
-SymbolTable::SymbolEntry& SymbolTable::Get(const std::string& name)
+SymbolTable::SymbolEntry& SymbolTable::Get(const std::string& name) { return findSymbol(name); }
+
+SymbolTable::SymbolEntry& SymbolTable::findSymbol(const std::string& name)
 {
 	auto iter = m_symbols.find(name);
 	if (iter != std::end(m_symbols))
@@ -38,9 +45,9 @@ SymbolTable::SymbolEntry& SymbolTable::Get(const std::string& name)
 	}
 	if (!m_parentScope.expired())
 	{
-		return m_parentScope.lock()->Get(name);
+		return m_parentScope.lock()->findSymbol(name);
 	}
-	throw std::runtime_error("Unable to find symbol");
+	throw SymbolNotFoundException(name);
 }
 
 void SymbolTable::DumpSymbols() const
@@ -49,6 +56,11 @@ void SymbolTable::DumpSymbols() const
 	for (auto symbol : m_symbols)
 	{
 		std::cout << symbol.first << ": " << symbol.second.m_value->ToString() << std::endl;
+	}
+
+	if (!m_parentScope.expired())
+	{
+		m_parentScope.lock()->DumpSymbols();
 	}
 }
 

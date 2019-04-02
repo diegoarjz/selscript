@@ -23,6 +23,8 @@ public:
 	virtual void Visit(ast::VarDeclPtr) = 0;
 	virtual void Visit(ast::StatementBlockPtr) = 0;
 	virtual void Visit(ast::CallPtr) = 0;
+	virtual void Visit(ast::FunctionDeclarationPtr) = 0;
+	virtual void Visit(ast::ReturnPtr) = 0;
 	virtual void Visit(ast::ProgramPtr) = 0;
 };
 }  // namespace sscript

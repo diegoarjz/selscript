@@ -326,6 +326,41 @@ private:
 };
 using CallPtr = std::shared_ptr<Call>;
 
+struct FunctionDeclaration : public Statement
+{
+	FunctionDeclaration(IdentifierPtr funIdentifier, const std::vector<IdentifierPtr> &params, StatementBlockPtr body)
+	    : m_functionIdentifier(funIdentifier), m_parameters(params), m_functionBody(body)
+	{
+	}
+	virtual ~FunctionDeclaration();
+
+	IdentifierPtr GetIdentifier() const { return m_functionIdentifier; }
+	const std::vector<IdentifierPtr> &GetParameters() const { return m_parameters; }
+	StatementBlockPtr GetFunctionBody() const { return m_functionBody; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	IdentifierPtr m_functionIdentifier;
+	std::vector<IdentifierPtr> m_parameters;
+	StatementBlockPtr m_functionBody;
+};
+using FunctionDeclarationPtr = std::shared_ptr<FunctionDeclaration>;
+
+struct Return : public Statement
+{
+	Return(ExpressionPtr returnValue) : m_returnValue(returnValue) {}
+	virtual ~Return();
+
+	ExpressionPtr GetReturnExpression() const { return m_returnValue; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	ExpressionPtr m_returnValue;
+};
+using ReturnPtr = std::shared_ptr<Return>;
+
 class Program : public AstNode
 {
 public:

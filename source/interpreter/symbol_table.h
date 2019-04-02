@@ -30,8 +30,40 @@ public:
 	void DumpSymbols() const;
 
 private:
+	SymbolEntry &findSymbol(const std::string &name);
+
 	std::unordered_map<std::string, SymbolEntry> m_symbols;
 	std::weak_ptr<SymbolTable> m_parentScope;
+	std::weak_ptr<SymbolTable> m_globals;
 	std::string m_symbolTableName;
+};
+
+class SymbolNotFoundException : public std::exception
+{
+public:
+	SymbolNotFoundException(const std::string &symbolName) : m_symbolName(symbolName) {}
+
+	const char *what() const throw() { return "Symbol referenced before declaration."; }
+	const std::string &GetSymbolName() const { return m_symbolName; }
+
+private:
+	std::string m_symbolName;
+};
+
+class SymbolShadowingException : public std::exception
+{
+public:
+	SymbolShadowingException(const std::string &symbolName, const SymbolTable::SymbolEntry &prevDeclaration)
+	    : m_symbolName(symbolName), m_previousDeclaration(prevDeclaration)
+	{
+	}
+
+	const char *what() const throw() { return "Symbol declaration shadows previous declaration."; }
+	const std::string &GetSymbolName() const { return m_symbolName; }
+	const SymbolTable::SymbolEntry &GetPreviousDeclaration() const { return m_previousDeclaration; }
+
+private:
+	std::string m_symbolName;
+	const SymbolTable::SymbolEntry m_previousDeclaration;
 };
 }  // namespace sscript

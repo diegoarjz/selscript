@@ -36,16 +36,48 @@ public:
 	BuiltinCallable(FunctionType function) : m_function(function) {}
 	virtual ~BuiltinCallable() {}
 
-	void Call(const std::vector<BaseValuePtr>& args) { return_from_function(m_function, args); }
+	void Call(interpreter_visitor* interpreter, const std::vector<BaseValuePtr>& args)
+	{
+		return_from_function(m_function, args);
+	}
 
 private:
 	FunctionType m_function;
 };
 
 template<typename R, typename... Args>
-std::shared_ptr<BuiltinCallable<std::function<R(Args...)>>> register_callable(std::function<R(Args...)> function)
+struct register_callable_helper
 {
-	return std::make_shared<BuiltinCallable<std::function<R(Args...)>>>(function);
+	static std::shared_ptr<BuiltinCallable<std::function<R(Args...)>>> register_callable(
+	    const std::string& functionName, std::function<R(Args...)> function)
+	{
+		auto callable = std::make_shared<BuiltinCallable<std::function<R(Args...)>>>(function);
+		callable->SetArity(sizeof...(Args));
+		callable->SetCallableName(functionName);
+
+		return callable;
+	}
+};
+
+template<typename R>
+struct register_callable_helper<R, const std::vector<BaseValuePtr>&>
+{
+	static std::shared_ptr<BuiltinCallable<std::function<R(const std::vector<BaseValuePtr>&)>>> register_callable(
+	    const std::string& functionName, std::function<R(const std::vector<BaseValuePtr>&)> function)
+	{
+		auto callable = std::make_shared<BuiltinCallable<std::function<R(const std::vector<BaseValuePtr>&)>>>(function);
+		callable->SetCallableName(functionName);
+		callable->SetVariadic(true);
+
+		return callable;
+	}
+};
+
+template<typename R, typename... Args>
+std::shared_ptr<BuiltinCallable<std::function<R(Args...)>>> register_callable(const std::string& functionName,
+                                                                              std::function<R(Args...)> function)
+{
+	return register_callable_helper<R, Args...>::register_callable(functionName, function);
 }
 
 }  // namespace sscript

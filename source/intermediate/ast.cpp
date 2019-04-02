@@ -66,6 +66,15 @@ void StatementBlock::AcceptVisitor(AstVisitor *v)
 Call::~Call() {}
 void Call::AcceptVisitor(AstVisitor *v) { v->Visit(std::dynamic_pointer_cast<Call>(shared_from_this())); }
 
+FunctionDeclaration::~FunctionDeclaration() {}
+void FunctionDeclaration::AcceptVisitor(AstVisitor *v)
+{
+	v->Visit(std::dynamic_pointer_cast<FunctionDeclaration>(shared_from_this()));
+}
+
+void Return::AcceptVisitor(AstVisitor *v) { v->Visit(std::dynamic_pointer_cast<Return>(shared_from_this())); }
+Return::~Return() {}
+
 Program::~Program() {}
 void Program::AcceptVisitor(AstVisitor *v) { v->Visit(std::dynamic_pointer_cast<Program>(shared_from_this())); }
 }  // namespace ast

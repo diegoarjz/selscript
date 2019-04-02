@@ -45,6 +45,12 @@ ast::ProgramPtr make_program(const std::vector<ast::StatementPtr> &statements);
 
 ast::CallPtr make_call(const ast::ExpressionPtr &callee, boost::optional<std::vector<ast::ExpressionPtr>> args);
 
+ast::FunctionDeclarationPtr make_function(ast::IdentifierPtr identifier,
+                                          boost::optional<std::vector<ast::IdentifierPtr>> &parameters,
+                                          const ast::StatementBlockPtr body);
+
+ast::ReturnPtr make_return_statement(boost::optional<ast::ExpressionPtr> return_expression);
+
 ast::StatementPtr make_for_loop(
     const boost::optional<boost::variant<ast::VarDeclPtr, ast::ExpressionStatementPtr>> &init,
     const boost::optional<ast::ExpressionPtr> &condition, const boost::optional<ast::ExpressionPtr> &increment,

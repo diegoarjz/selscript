@@ -156,6 +156,31 @@ void AstPrinter::Visit(ast::CallPtr c)
 	deindent();
 }
 
+void AstPrinter::Visit(ast::FunctionDeclarationPtr f)
+{
+	indent();
+	std::cout << indentation() << "<FunctionDeclaration>" << std::endl;
+	f->GetIdentifier()->AcceptVisitor(this);
+	for (auto &par : f->GetParameters())
+	{
+		par->AcceptVisitor(this);
+	}
+	f->GetFunctionBody()->AcceptVisitor(this);
+	deindent();
+}
+
+void AstPrinter::Visit(ast::ReturnPtr r)
+{
+	indent();
+	std::cout << indentation() << "<Return>" << std::endl;
+	auto expression = r->GetReturnExpression();
+	if (expression)
+	{
+		expression->AcceptVisitor(this);
+	}
+	deindent();
+}
+
 void AstPrinter::Visit(ast::ProgramPtr p)
 {
 	std::cout << "<Program>" << std::endl;

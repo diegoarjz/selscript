@@ -1,5 +1,6 @@
 set(INTERPRETER_SOURCES
     "interpreter.cpp"
+    "interpreter_visitor.cpp"
     "symbol_table.cpp"
 )
 

@@ -1,0 +1,93 @@
+#pragma once
+
+#include "intermediate/ast_visitor.h"
+
+#include <memory>
+#include <stack>
+
+namespace sscript
+{
+namespace ast
+{
+struct Number;
+using NumberPtr = std::shared_ptr<Number>;
+struct String;
+using StringPtr = std::shared_ptr<String>;
+struct Identifier;
+using IdentifierPtr = std::shared_ptr<Identifier>;
+struct Boolean;
+using BooleanPtr = std::shared_ptr<Boolean>;
+struct Null;
+using NullPtr = std::shared_ptr<Null>;
+struct ArithmeticOp;
+using ArithmeticOpPtr = std::shared_ptr<ArithmeticOp>;
+struct Unary;
+using UnaryPtr = std::shared_ptr<Unary>;
+struct ComparisonOp;
+using ComparisonOpPtr = std::shared_ptr<ComparisonOp>;
+struct LogicOp;
+using LogicOpPtr = std::shared_ptr<LogicOp>;
+struct Assignment;
+using AssignmentPtr = std::shared_ptr<Assignment>;
+struct ExpressionStatement;
+using ExpressionStatementPtr = std::shared_ptr<ExpressionStatement>;
+struct IfStatement;
+using IfStatementPtr = std::shared_ptr<IfStatement>;
+struct Loop;
+using LoopPtr = std::shared_ptr<Loop>;
+struct VarDecl;
+using VarDeclPtr = std::shared_ptr<VarDecl>;
+struct StatementBlock;
+using StatementBlockPtr = std::shared_ptr<StatementBlock>;
+struct Call;
+using CallPtr = std::shared_ptr<Call>;
+struct FunctionDeclaration;
+using FunctionDeclarationPtr = std::shared_ptr<FunctionDeclaration>;
+class Program;
+using ProgramPtr = std::shared_ptr<Program>;
+}  // namespace ast
+
+struct BaseValue;
+using BaseValuePtr = std::shared_ptr<BaseValue>;
+class SymbolTable;
+
+struct interpreter_visitor : public AstVisitor
+{
+	interpreter_visitor();
+	~interpreter_visitor();
+
+	void Visit(ast::NumberPtr n) override;
+	void Visit(ast::StringPtr s) override;
+	void Visit(ast::IdentifierPtr i) override;
+	void Visit(ast::BooleanPtr b) override;
+	void Visit(ast::Nullptr n) override;
+	void Visit(ast::ArithmeticOpPtr op) override;
+	void Visit(ast::UnaryPtr u) override;
+	void Visit(ast::ComparisonOpPtr op) override;
+	void Visit(ast::LogicOpPtr op) override;
+	void Visit(ast::AssignmentPtr a) override;
+	void Visit(ast::ExpressionStatementPtr e) override;
+	void Visit(ast::IfStatementPtr i) override;
+	void Visit(ast::LoopPtr l) override;
+	void Visit(ast::VarDeclPtr v) override;
+	void Visit(ast::StatementBlockPtr b) override;
+	void Visit(ast::CallPtr c) override;
+	void Visit(ast::FunctionDeclarationPtr func) override;
+	void Visit(ast::ReturnPtr r) override;
+	void Visit(ast::ProgramPtr p) override;
+
+	void PushValue(const BaseValuePtr &v);
+	BaseValuePtr PopValue();
+
+	void EnterBlock();
+	void ExitBlock(std::shared_ptr<SymbolTable> previousSymbolTable);
+	void EnterFunction(const std::string &name);
+	void ExitFunction(std::shared_ptr<SymbolTable> previousSymbolTable);
+	std::shared_ptr<SymbolTable> GetCurrentSymbolTable() { return m_symbolTable; }
+
+private:
+	std::stack<BaseValuePtr> m_values;
+	std::shared_ptr<SymbolTable> m_globals;
+	std::shared_ptr<SymbolTable> m_symbolTable;
+};
+}  // namespace sscript
