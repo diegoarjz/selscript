@@ -5,6 +5,7 @@ set(VALUE_SOURCES
     "callable.cpp"
     "float_value.cpp"
     "functional.cpp"
+    "integer_value.cpp"
     "null_object_value.cpp"
     "string_value.cpp"
 )

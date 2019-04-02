@@ -1,6 +1,7 @@
 #pragma once
 
 #include "float_value.h"
+#include "integer_value.h"
 #include "value_visitor.h"
 
 #include <functional>

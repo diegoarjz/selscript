@@ -6,6 +6,7 @@ namespace sscript
 {
 struct Boolean;
 struct Float;
+struct Integer;
 struct String;
 struct NullObject;
 struct Callable;
@@ -20,6 +21,7 @@ struct ValueVisitorBase
 {
 	virtual void Visit(Boolean*) = 0;
 	virtual void Visit(Float*) = 0;
+	virtual void Visit(Integer*) = 0;
 	virtual void Visit(String*) = 0;
 	virtual void Visit(NullObject*) = 0;
 	virtual void Visit(Callable*) = 0;
@@ -32,6 +34,7 @@ struct value_visitor : public ValueVisitorBase
 
 	void Visit(Boolean* b) override { m_returnValue = m_visitor(*b); }
 	void Visit(Float* f) override { m_returnValue = m_visitor(*f); }
+	void Visit(Integer* f) override { m_returnValue = m_visitor(*f); }
 	void Visit(String* s) override { m_returnValue = m_visitor(*s); }
 	void Visit(NullObject* n) override { m_returnValue = m_visitor(*n); }
 	void Visit(Callable* c) override { m_returnValue = m_visitor(*c); }
@@ -49,6 +52,7 @@ struct value_visitor<void, V> : public ValueVisitorBase
 
 	void Visit(Boolean* b) override { m_visitor(*b); }
 	void Visit(Float* f) override { m_visitor(*f); }
+	void Visit(Integer* f) override { m_visitor(*f); }
 	void Visit(String* s) override { m_visitor(*s); }
 	void Visit(NullObject* n) override { m_visitor(*n); }
 	void Visit(Callable* c) override { m_visitor(*c); }

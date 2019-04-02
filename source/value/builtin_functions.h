@@ -9,7 +9,9 @@ struct BaseValue;
 using BaseValuePtr = std::shared_ptr<BaseValue>;
 struct Float;
 using FloatPtr = std::shared_ptr<Float>;
+struct Integer;
+using IntegerPtr = std::shared_ptr<Integer>;
 
 void print(const std::vector<BaseValuePtr>& args);
-FloatPtr time();
+IntegerPtr time();
 }  // namespace sscript

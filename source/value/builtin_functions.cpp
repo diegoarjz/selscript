@@ -1,7 +1,9 @@
 #include "builtin_functions.h"
 
 #include "float_value.h"
+#include "integer_value.h"
 
+#include <chrono>
 #include <iostream>
 
 namespace sscript
@@ -14,8 +16,13 @@ void print(const std::vector<BaseValuePtr> &args)
 	}
 	std::cout << std::endl;
 }
-void print_float(const float &f) { std::cout << "Print float " << f << std::endl; }
-void print_things() { std::cout << "things" << std::endl; }
 
-FloatPtr time() { return std::make_shared<Float>(123); }
+using clock = std::chrono::high_resolution_clock;
+auto _start = clock::now().time_since_epoch();
+IntegerPtr time()
+{
+	auto now = clock::now().time_since_epoch();
+	long long milliseconds_since_start = std::chrono::duration_cast<std::chrono::milliseconds>(now - _start).count();
+	return std::make_shared<Integer>(milliseconds_since_start);
+}
 }  // namespace sscript
