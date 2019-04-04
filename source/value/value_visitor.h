@@ -30,7 +30,7 @@ struct ValueVisitorBase
 template<typename R, class V>
 struct value_visitor : public ValueVisitorBase
 {
-	value_visitor(V& visitor) : m_visitor(visitor) {}
+	explicit value_visitor(V& visitor) : m_visitor(visitor), m_returnValue(R{}) {}
 
 	void Visit(Boolean* b) override { m_returnValue = m_visitor(*b); }
 	void Visit(Float* f) override { m_returnValue = m_visitor(*f); }
@@ -48,7 +48,7 @@ struct value_visitor : public ValueVisitorBase
 template<class V>
 struct value_visitor<void, V> : public ValueVisitorBase
 {
-	value_visitor(V& visitor) : m_visitor(visitor) {}
+	explicit value_visitor(V& visitor) : m_visitor(visitor) {}
 
 	void Visit(Boolean* b) override { m_visitor(*b); }
 	void Visit(Float* f) override { m_visitor(*f); }

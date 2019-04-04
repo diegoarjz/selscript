@@ -8,7 +8,7 @@ namespace sscript
 {
 SymbolTable::SymbolTable(const std::string& tableName) : m_symbolTableName(tableName) {}
 
-SymbolTable::SymbolTable(const std::string& tableName, std::shared_ptr<SymbolTable> parentScope)
+SymbolTable::SymbolTable(const std::string& tableName, const std::shared_ptr<SymbolTable>& parentScope)
     : m_parentScope(parentScope), m_symbolTableName(tableName)
 {
 }

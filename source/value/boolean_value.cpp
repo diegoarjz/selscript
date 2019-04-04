@@ -4,8 +4,10 @@
 
 namespace sscript
 {
-Boolean::Boolean() : BaseValue("Boolean"), m_value(false) {}
-Boolean::Boolean(const bool& b) : BaseValue("Boolean"), m_value(b) {}
+const TypeInfo Boolean::typeInfo("Boolean");
+
+Boolean::Boolean() : BaseValue(typeInfo.Name()), m_value(false) {}
+Boolean::Boolean(const bool& b) : BaseValue(typeInfo.Name()), m_value(b) {}
 Boolean::~Boolean() {}
 
 std::string Boolean::ToString() const { return (m_value ? "true" : "false"); }

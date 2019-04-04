@@ -8,6 +8,8 @@ set(VALUE_SOURCES
     "integer_value.cpp"
     "null_object_value.cpp"
     "string_value.cpp"
+    "type_info.cpp"
+    "undefined_operator.cpp"
 )
 
 add_library(value ${VALUE_SOURCES})

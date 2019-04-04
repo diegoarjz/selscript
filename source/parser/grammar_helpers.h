@@ -6,7 +6,9 @@ namespace sscript
 {
 ast::IdentifierPtr make_identifier(const std::vector<char> &identifier);
 
-ast::NumberPtr make_number(const float &f);
+ast::FloatPtr make_float(const float &f);
+
+ast::IntegerPtr make_int(const int &i);
 
 ast::StringPtr make_string(const std::vector<char> &s);
 

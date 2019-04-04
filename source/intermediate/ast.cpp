@@ -6,8 +6,11 @@ namespace sscript
 {
 namespace ast
 {
-Number::~Number() {}
-void Number::AcceptVisitor(AstVisitor *v) { v->Visit(std::dynamic_pointer_cast<Number>(shared_from_this())); }
+Float::~Float() {}
+void Float::AcceptVisitor(AstVisitor *v) { v->Visit(std::dynamic_pointer_cast<Float>(shared_from_this())); }
+
+Integer::~Integer() {}
+void Integer::AcceptVisitor(AstVisitor *v) { v->Visit(std::dynamic_pointer_cast<Integer>(shared_from_this())); }
 
 String::~String() {}
 void String::AcceptVisitor(AstVisitor *v) { v->Visit(std::dynamic_pointer_cast<String>(shared_from_this())); }

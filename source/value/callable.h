@@ -3,6 +3,8 @@
 #include "base_value.h"
 #include "float_value.h"
 #include "functional.h"
+#include "type_info.h"
+#include "undefined_operator.h"
 
 #include <vector>
 
@@ -18,6 +20,8 @@ struct interpreter_visitor;
 
 struct Callable : public BaseValue
 {
+	static const TypeInfo typeInfo;
+
 	Callable();
 	virtual ~Callable();
 
@@ -37,6 +41,71 @@ struct Callable : public BaseValue
 	void SetParameterNames(const std::vector<std::string>& parameters) { m_parameterNames = parameters; }
 	const std::vector<std::string>& GetParameterNames() const { return m_parameterNames; }
 	void SetCallableBody(ast::StatementBlockPtr body) { m_callableBody = body; }
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator+(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException("+", typeInfo, T::typeInfo);
+	}
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator-(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException("-", typeInfo, T::typeInfo);
+	}
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator*(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException("/", typeInfo, T::typeInfo);
+	}
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator/(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException("/", typeInfo, T::typeInfo);
+	}
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator==(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException("==", typeInfo, T::typeInfo);
+	}
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator!=(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException("!=", typeInfo, T::typeInfo);
+	}
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator<(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException("<", typeInfo, T::typeInfo);
+	}
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator<=(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException("<=", typeInfo, T::typeInfo);
+	}
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator>(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException(">", typeInfo, T::typeInfo);
+	}
+
+	template<class T>
+	std::shared_ptr<BaseValue> operator>=(const T& o) const
+	{
+		throw UndefinedBinaryOperatorException(">=", typeInfo, T::typeInfo);
+	}
+
+	bool operator!() const { throw UndefinedUnaryOperatorException("!", typeInfo); }
+	explicit operator bool() { throw UndefinedUnaryOperatorException("conversion to bool", typeInfo); }
+
+	std::shared_ptr<BaseValue> operator-() const { throw UndefinedUnaryOperatorException("-", typeInfo); }
 
 private:
 	ast::StatementBlockPtr m_callableBody;

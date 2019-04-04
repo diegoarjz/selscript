@@ -17,171 +17,91 @@ namespace bin_ops
 {
 struct add
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Float>(lhs.m_value + rhs.m_value);
-	}
-	static BaseValuePtr apply(const String &lhs, const String &rhs)
-	{
-		return std::make_shared<String>(lhs.m_value + rhs.m_value);
-	}
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to add operands");
+		return lhs + rhs;
 	}
 };
 
 struct sub
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Float>(lhs.m_value - rhs.m_value);
-	}
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to subtract operands");
+		return lhs - rhs;
 	}
 };
 
 struct mul
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Float>(lhs.m_value * rhs.m_value);
-	}
-	static BaseValuePtr apply(const String &lhs, const Float &rhs)
-	{
-		std::string r;
-		for (auto i = 0u; i < static_cast<uint32_t>(rhs.m_value); ++i)
-		{
-			r += lhs.m_value;
-		}
-		return std::make_shared<String>(r);
-	}
-	static BaseValuePtr apply(const Float &lhs, const String &rhs) { return apply(rhs, lhs); }
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to multiply operands");
+		return lhs * rhs;
 	}
 };
 
 struct div
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Float>(lhs.m_value / rhs.m_value);
-	}
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to divide operands");
+		return lhs / rhs;
 	}
 };
 
 struct eq
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value == rhs.m_value);
-	}
-	static BaseValuePtr apply(const Boolean &lhs, const Boolean &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value == rhs.m_value);
-	}
-	static BaseValuePtr apply(const String &lhs, const String &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value == rhs.m_value);
-	}
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to compare operands for equality");
+		return lhs == rhs;
 	}
 };
 
 struct ne
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value != rhs.m_value);
-	}
-	static BaseValuePtr apply(const Boolean &lhs, const Boolean &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value != rhs.m_value);
-	}
-	static BaseValuePtr apply(const String &lhs, const String &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value != rhs.m_value);
-	}
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to compare operands for equality");
+		return lhs != rhs;
 	}
 };
 
 struct gt
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value > rhs.m_value);
-	}
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to compare operands for equality");
+		return lhs > rhs;
 	}
 };
 
 struct gte
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value >= rhs.m_value);
-	}
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to compare operands for equality");
+		return lhs >= rhs;
 	}
 };
 
 struct lt
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value < rhs.m_value);
-	}
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to compare operands for equality");
+		return lhs < rhs;
 	}
 };
 
 struct lte
 {
-	static BaseValuePtr apply(const Float &lhs, const Float &rhs)
-	{
-		return std::make_shared<Boolean>(lhs.m_value <= rhs.m_value);
-	}
-
 	template<typename LHS, typename RHS>
 	static BaseValuePtr apply(const LHS &lhs, const RHS &rhs)
 	{
-		throw std::runtime_error("Unable to compare operands for equality");
+		return lhs <= rhs;
 	}
 };
 }  // namespace bin_ops
@@ -190,23 +110,19 @@ namespace unary_ops
 {
 struct negate
 {
-	static BaseValuePtr apply(const Boolean &b) { return std::make_shared<Boolean>(!b.m_value); }
-
 	template<typename T>
 	static BaseValuePtr apply(const T &v)
 	{
-		throw std::runtime_error("Unable to negate operand");
+		return std::make_shared<Boolean>(!v);
 	}
 };
 
 struct minus
 {
-	static BaseValuePtr apply(const Float &f) { return std::make_shared<Float>(-f.m_value); }
-
 	template<typename T>
 	static BaseValuePtr apply(const T &v)
 	{
-		throw std::runtime_error("Unable to apply minus to operand");
+		return -v;
 	}
 };
 }  // namespace unary_ops
@@ -233,7 +149,7 @@ struct binary_op_dispatcher : public ValueVisitor<BaseValuePtr>
 	struct binary_op_rhs_dispatcher : public ValueVisitor<BaseValuePtr>
 	{
 		const LHS &m_lhs;
-		binary_op_rhs_dispatcher(const LHS &lhs) : m_lhs(lhs) {}
+		explicit binary_op_rhs_dispatcher(const LHS &lhs) : m_lhs(lhs) {}
 
 		template<typename RHS>
 		BaseValuePtr operator()(const RHS &rhs)
@@ -277,7 +193,9 @@ interpreter_visitor::interpreter_visitor()
 
 interpreter_visitor::~interpreter_visitor() {}
 
-void interpreter_visitor::Visit(ast::NumberPtr n) { PushValue(std::make_shared<Float>(n->GetNumber())); }
+void interpreter_visitor::Visit(ast::FloatPtr n) { PushValue(std::make_shared<Float>(n->GetNumber())); }
+
+void interpreter_visitor::Visit(ast::IntegerPtr n) { PushValue(std::make_shared<Integer>(n->GetInteger())); }
 
 void interpreter_visitor::Visit(ast::StringPtr s) { PushValue(std::make_shared<String>(s->GetString())); }
 
@@ -514,7 +432,7 @@ void interpreter_visitor::EnterBlock()
 	m_symbolTable = std::make_shared<SymbolTable>("Block", GetCurrentSymbolTable());
 }
 
-void interpreter_visitor::ExitBlock(std::shared_ptr<SymbolTable> previousSymbolTable)
+void interpreter_visitor::ExitBlock(const std::shared_ptr<SymbolTable> &previousSymbolTable)
 {
 	m_symbolTable = previousSymbolTable;
 }
@@ -524,7 +442,7 @@ void interpreter_visitor::EnterFunction(const std::string &name)
 	m_symbolTable = std::make_shared<SymbolTable>(name, m_globals);
 }
 
-void interpreter_visitor::ExitFunction(std::shared_ptr<SymbolTable> previousSymbolTable)
+void interpreter_visitor::ExitFunction(const std::shared_ptr<SymbolTable> &previousSymbolTable)
 {
 	m_symbolTable = previousSymbolTable;
 }
