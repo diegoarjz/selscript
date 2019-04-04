@@ -87,7 +87,7 @@ struct String : public BaseValue
 	}
 
 	bool operator!() const { return m_value.size() == 0; }
-	explicit operator bool() { return m_value.size() != 0; }
+	explicit operator bool() const { return m_value.size() != 0; }
 
 	std::shared_ptr<BaseValue> operator-() const { throw UndefinedUnaryOperatorException("-", typeInfo); }
 

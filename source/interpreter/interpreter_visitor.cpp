@@ -168,15 +168,10 @@ struct binary_op_dispatcher : public ValueVisitor<BaseValuePtr>
 
 struct is_true : public ValueVisitor<bool>
 {
-	bool operator()(const Float &f) { return f.m_value; }
-	bool operator()(const Boolean &b) { return b.m_value; }
-	bool operator()(const String &s) { return s.m_value.size() != 0; }
-	bool operator()(const NullObject &n) { return false; }
-
 	template<typename T>
 	bool operator()(const T &t)
 	{
-		throw std::runtime_error("Unable to evaluate truthness");
+		return static_cast<bool>(t);
 	}
 };
 
@@ -437,9 +432,17 @@ void interpreter_visitor::ExitBlock(const std::shared_ptr<SymbolTable> &previous
 	m_symbolTable = previousSymbolTable;
 }
 
-void interpreter_visitor::EnterFunction(const std::string &name)
+void interpreter_visitor::EnterFunction(const CallablePtr &callable)
 {
-	m_symbolTable = std::make_shared<SymbolTable>(name, m_globals);
+	auto closure = callable->GetClosure();
+	if (closure)
+	{
+		m_symbolTable = std::make_shared<SymbolTable>(callable->GetCallableName(), closure);
+	}
+	else
+	{
+		m_symbolTable = std::make_shared<SymbolTable>(callable->GetCallableName(), m_globals);
+	}
 }
 
 void interpreter_visitor::ExitFunction(const std::shared_ptr<SymbolTable> &previousSymbolTable)
@@ -465,7 +468,7 @@ void interpreter_visitor::Visit(ast::CallPtr c)
 	}
 
 	auto prevSymbolTable = GetCurrentSymbolTable();
-	EnterFunction(callee->GetCallableName());
+	EnterFunction(callee);
 	try
 	{
 		callee->Call(this, args);
@@ -490,6 +493,7 @@ void interpreter_visitor::Visit(ast::FunctionDeclarationPtr func)
 	auto callable = std::make_shared<Callable>();
 	callable->SetCallableBody(body);
 	callable->SetCallableName(identifier);
+	callable->SetClosure(GetCurrentSymbolTable());
 
 	std::vector<std::string> parameterNames;
 	parameterNames.reserve(parameters.size());

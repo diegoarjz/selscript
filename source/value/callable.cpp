@@ -22,11 +22,25 @@ void Callable::AcceptVisitor(ValueVisitorBase *v) { v->Visit(this); }
 
 void Callable::Call(interpreter_visitor *interpreter, const std::vector<BaseValuePtr> &args)
 {
-	for (std::size_t i = 0; i < GetArity(); ++i)
+	try
 	{
-		interpreter->GetCurrentSymbolTable()->Declare({m_parameterNames[i], args[i]});
-	}
+		for (std::size_t i = 0; i < GetArity(); ++i)
+		{
+			interpreter->GetCurrentSymbolTable()->Declare({m_parameterNames[i], args[i]});
+		}
 
-	m_callableBody->AcceptVisitor(interpreter);
+        const auto &statements = m_callableBody->GetStatements();
+        for (const auto& s : statements)
+        {
+            s->AcceptVisitor(interpreter);
+        }
+	}
+	catch (SymbolNotFoundException &e)
+	{
+		std::cout << "Symbol not found" << std::endl;
+		std::cout << e.what() << std::endl;
+		interpreter->GetCurrentSymbolTable()->DumpSymbols();
+		throw e;
+	}
 }
 }  // namespace sscript

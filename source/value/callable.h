@@ -17,6 +17,7 @@ using StatementBlockPtr = std::shared_ptr<StatementBlock>;
 }  // namespace ast
 
 struct interpreter_visitor;
+class SymbolTable;
 
 struct Callable : public BaseValue
 {
@@ -27,7 +28,6 @@ struct Callable : public BaseValue
 
 	std::string ToString() const override;
 	void AcceptVisitor(ValueVisitorBase*) override;
-
 	virtual void Call(interpreter_visitor* interpreter, const std::vector<BaseValuePtr>& args);
 
 	void SetCallableName(const std::string& n) { m_identifier = n; }
@@ -41,6 +41,8 @@ struct Callable : public BaseValue
 	void SetParameterNames(const std::vector<std::string>& parameters) { m_parameterNames = parameters; }
 	const std::vector<std::string>& GetParameterNames() const { return m_parameterNames; }
 	void SetCallableBody(ast::StatementBlockPtr body) { m_callableBody = body; }
+	void SetClosure(const std::shared_ptr<SymbolTable>& closure) { m_closure = closure; }
+	const std::shared_ptr<SymbolTable>& GetClosure() const { return m_closure; }
 
 	template<class T>
 	std::shared_ptr<BaseValue> operator+(const T& o) const
@@ -103,11 +105,12 @@ struct Callable : public BaseValue
 	}
 
 	bool operator!() const { throw UndefinedUnaryOperatorException("!", typeInfo); }
-	explicit operator bool() { throw UndefinedUnaryOperatorException("conversion to bool", typeInfo); }
+	explicit operator bool() const { throw UndefinedUnaryOperatorException("conversion to bool", typeInfo); }
 
 	std::shared_ptr<BaseValue> operator-() const { throw UndefinedUnaryOperatorException("-", typeInfo); }
 
 private:
+	std::shared_ptr<SymbolTable> m_closure;
 	ast::StatementBlockPtr m_callableBody;
 	std::string m_identifier;
 	std::vector<std::string> m_parameterNames;

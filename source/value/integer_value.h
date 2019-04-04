@@ -105,7 +105,7 @@ struct Integer : public BaseValue
 	}
 
 	bool operator!() const { return m_value == 0; }
-	explicit operator bool() { return m_value != 0; }
+	explicit operator bool() const { return m_value != 0; }
 
 	std::shared_ptr<BaseValue> operator-() const { return std::make_shared<Integer>(-m_value); }
 

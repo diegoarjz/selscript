@@ -51,6 +51,8 @@ using ProgramPtr = std::shared_ptr<Program>;
 
 struct BaseValue;
 using BaseValuePtr = std::shared_ptr<BaseValue>;
+struct Callable;
+using CallablePtr = std::shared_ptr<Callable>;
 class SymbolTable;
 
 struct interpreter_visitor : public AstVisitor
@@ -84,7 +86,7 @@ struct interpreter_visitor : public AstVisitor
 
 	void EnterBlock();
 	void ExitBlock(const std::shared_ptr<SymbolTable> &previousSymbolTable);
-	void EnterFunction(const std::string &name);
+	void EnterFunction(const CallablePtr &callable);
 	void ExitFunction(const std::shared_ptr<SymbolTable> &previousSymbolTable);
 	std::shared_ptr<SymbolTable> GetCurrentSymbolTable() { return m_symbolTable; }
 

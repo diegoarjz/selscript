@@ -77,7 +77,7 @@ struct NullObject : public BaseValue
 	}
 
 	bool operator!() const { return true; }
-	explicit operator bool() { return false; }
+	explicit operator bool() const { return false; }
 
 	std::shared_ptr<BaseValue> operator-() const { throw UndefinedUnaryOperatorException("-", typeInfo); }
 };
