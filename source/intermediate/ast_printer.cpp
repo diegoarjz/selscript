@@ -4,10 +4,17 @@ namespace sscript
 {
 AstPrinter::AstPrinter() : m_indentation(0) {}
 
-void AstPrinter::Visit(ast::NumberPtr n)
+void AstPrinter::Visit(ast::FloatPtr n)
 {
 	indent();
-	std::cout << indentation() << "<Number:" << n->GetNumber() << ">" << std::endl;
+	std::cout << indentation() << "<Float:" << n->GetNumber() << ">" << std::endl;
+	deindent();
+}
+
+void AstPrinter::Visit(ast::IntegerPtr n)
+{
+	indent();
+	std::cout << indentation() << "<Integer:" << n->GetInteger() << ">" << std::endl;
 	deindent();
 }
 

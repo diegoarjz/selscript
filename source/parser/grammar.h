@@ -47,7 +47,9 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		kw_return = kw("return");
 
 		identifier = lexeme[(+(char_('_') | alpha) >> *(alnum | char_('_')))[_val = bind(make_identifier, qi::_1)]];
-		number = float_[_val = bind(make_number, qi::_1)];
+		number = Integer | Float;
+		Float = float_[_val = bind(make_float, qi::_1)];
+		Integer = int_[_val = bind(make_int, qi::_1)] >> !float_;
 		string = lexeme[(('"' >> *(char_ - '"')) > '"')[_val = bind(make_string, qi::_1)]];
 
 		/*
@@ -181,7 +183,7 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		arguments = expression % ',';
 
 		/*
-		 * primary -> "true" | "false" | "null" | number | string | identifier
+		 * primary -> "true" | "false" | "null" | Float | string | identifier
 		 *            | "(" expression ")"
 		 */
 		primary = kw_true[_val = bind(make_true)] | kw_false[_val = bind(make_false)] |
@@ -204,7 +206,9 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 	rule<Iterator, std::string(), space_type> kw_and;
 
 	rule<Iterator, ast::IdentifierPtr(), space_type> identifier;
-	rule<Iterator, ast::NumberPtr(), space_type> number;
+	rule<Iterator, ast::ExpressionPtr(), space_type> number;
+	rule<Iterator, ast::FloatPtr(), space_type> Float;
+	rule<Iterator, ast::IntegerPtr(), space_type> Integer;
 	rule<Iterator, ast::StringPtr(), space_type> string;
 
 	rule<Iterator, ast::ProgramPtr(), space_type> program;

@@ -28,7 +28,7 @@ const float& argument_value<const float&>(BaseValuePtr);
 template<typename R, typename... Args>
 struct call_function_helper
 {
-	static R call(std::function<R(Args...)> f, const std::vector<BaseValuePtr>& args) {}
+	static R call(std::function<R(Args...)>& f, const std::vector<BaseValuePtr>& args) {}
 };
 
 template<typename R>

@@ -9,7 +9,9 @@ ast::IdentifierPtr make_identifier(const std::vector<char> &identifier)
 	return std::make_shared<ast::Identifier>(identifier);
 }
 
-ast::NumberPtr make_number(const float &f) { return std::make_shared<ast::Number>(f); }
+ast::FloatPtr make_float(const float &f) { return std::make_shared<ast::Float>(f); }
+
+ast::IntegerPtr make_int(const int &i) { return std::make_shared<ast::Integer>(i); }
 
 ast::StringPtr make_string(const std::vector<char> &s)
 {

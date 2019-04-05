@@ -10,7 +10,8 @@ class AstPrinter : public AstVisitor
 public:
 	AstPrinter();
 
-	void Visit(ast::NumberPtr) override;
+	void Visit(ast::FloatPtr) override;
+	void Visit(ast::IntegerPtr) override;
 	void Visit(ast::StringPtr) override;
 	void Visit(ast::IdentifierPtr) override;
 	void Visit(ast::BooleanPtr) override;

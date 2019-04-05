@@ -7,7 +7,8 @@ namespace sscript
 class AstVisitor
 {
 public:
-	virtual void Visit(ast::NumberPtr) = 0;
+	virtual void Visit(ast::FloatPtr) = 0;
+	virtual void Visit(ast::IntegerPtr) = 0;
 	virtual void Visit(ast::StringPtr) = 0;
 	virtual void Visit(ast::IdentifierPtr) = 0;
 	virtual void Visit(ast::BooleanPtr) = 0;

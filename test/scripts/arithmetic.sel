@@ -3,6 +3,14 @@ var float_sub = 2.0 - 1.0;
 var float_mul = 1.0 * 2.0;
 var float_div = 4.0 / 2.0;
 
+var int_add = 1 + 2;
+var int_sub = 2 - 1;
+var int_mul = 3 * 2;
+var int_div = 4 / 2;
+
+var cast_to_float_left = 1 + 3.1;
+var cast_to_float_right = 3.1 + 1;
+
 var float_mul_precedence = 3.0 + 1*2;
 var float_div_precedence = 3.0 + 4/2;
 var float_parenthesis = 4 / (1 + 1);
@@ -17,6 +25,12 @@ print("float_add = ", float_add);
 print("float_sub = ", float_sub);
 print("float_mul = ", float_mul);
 print("float_div = ", float_div);
+print("int_add = ", int_add);
+print("int_sub = ", int_sub);
+print("int_mul = ", int_mul);
+print("int_div = ", int_div);
+print("cast_to_float_left = ", cast_to_float_left);
+print("cast_to_float_right = ", cast_to_float_right);
 print("float_mul_precedence = ", float_mul_precedence);
 print("float_div_precedence = ", float_div_precedence);
 print("float_parenthesis = ", float_parenthesis);

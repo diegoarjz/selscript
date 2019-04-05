@@ -12,19 +12,35 @@
 
 namespace sscript
 {
-Callable::Callable() : BaseValue("Callable"), m_variadic(false) {}
+const TypeInfo Callable::typeInfo("Callable");
+
+Callable::Callable() : BaseValue(typeInfo.Name()), m_arity(0), m_variadic(false) {}
 Callable::~Callable() {}
 
-std::string Callable::ToString() const { return "<" + m_typeName + ">"; }
+std::string Callable::ToString() const { return "<" + m_typeName + ":" + m_identifier + ">"; }
 void Callable::AcceptVisitor(ValueVisitorBase *v) { v->Visit(this); }
 
 void Callable::Call(interpreter_visitor *interpreter, const std::vector<BaseValuePtr> &args)
 {
-	for (std::size_t i = 0; i < GetArity(); ++i)
+	try
 	{
-		interpreter->GetCurrentSymbolTable()->Declare({m_parameterNames[i], args[i]});
-	}
+		for (std::size_t i = 0; i < GetArity(); ++i)
+		{
+			interpreter->GetCurrentSymbolTable()->Declare({m_parameterNames[i], args[i]});
+		}
 
-	m_callableBody->AcceptVisitor(interpreter);
+        const auto &statements = m_callableBody->GetStatements();
+        for (const auto& s : statements)
+        {
+            s->AcceptVisitor(interpreter);
+        }
+	}
+	catch (SymbolNotFoundException &e)
+	{
+		std::cout << "Symbol not found" << std::endl;
+		std::cout << e.what() << std::endl;
+		interpreter->GetCurrentSymbolTable()->DumpSymbols();
+		throw e;
+	}
 }
 }  // namespace sscript

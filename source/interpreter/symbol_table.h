@@ -19,8 +19,8 @@ public:
 	};
 
 	SymbolTable() = delete;
-	SymbolTable(const std::string &tableName);
-	SymbolTable(const std::string &tableName, std::shared_ptr<SymbolTable> parentScope);
+	explicit SymbolTable(const std::string &tableName);
+	SymbolTable(const std::string &tableName, const std::shared_ptr<SymbolTable> &parentScope);
 	SymbolTable(const SymbolTable &) = delete;
 	SymbolTable &operator=(const SymbolTable &) = delete;
 
@@ -39,27 +39,30 @@ private:
 	std::string m_symbolTableName;
 };
 
-class SymbolNotFoundException : public std::exception
+class SymbolNotFoundException : public std::runtime_error
 {
 public:
-	SymbolNotFoundException(const std::string &symbolName) : m_symbolName(symbolName) {}
+	explicit SymbolNotFoundException(const std::string &symbolName)
+	    : std::runtime_error("Symbol " + symbolName + " referenced before declaration."), m_symbolName(symbolName)
+	{
+	}
 
-	const char *what() const throw() { return "Symbol referenced before declaration."; }
 	const std::string &GetSymbolName() const { return m_symbolName; }
 
 private:
 	std::string m_symbolName;
 };
 
-class SymbolShadowingException : public std::exception
+class SymbolShadowingException : public std::runtime_error
 {
 public:
 	SymbolShadowingException(const std::string &symbolName, const SymbolTable::SymbolEntry &prevDeclaration)
-	    : m_symbolName(symbolName), m_previousDeclaration(prevDeclaration)
+	    : std::runtime_error("Symbol " + symbolName + " declaration shadows previous declaration"),
+	      m_symbolName(symbolName),
+	      m_previousDeclaration(prevDeclaration)
 	{
 	}
 
-	const char *what() const throw() { return "Symbol declaration shadows previous declaration."; }
 	const std::string &GetSymbolName() const { return m_symbolName; }
 	const SymbolTable::SymbolEntry &GetPreviousDeclaration() const { return m_previousDeclaration; }
 

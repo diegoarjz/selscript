@@ -4,7 +4,9 @@
 
 namespace sscript
 {
-NullObject::NullObject() : BaseValue("Null") {}
+const TypeInfo NullObject::typeInfo("Null");
+
+NullObject::NullObject() : BaseValue(typeInfo.Name()) {}
 NullObject::~NullObject() {}
 
 std::string NullObject::ToString() const { return "null"; }

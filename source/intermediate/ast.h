@@ -34,10 +34,10 @@ struct Expression : public AstNode
 };
 using ExpressionPtr = std::shared_ptr<Expression>;
 
-struct Number : public Expression
+struct Float : public Expression
 {
-	explicit Number(const float &f) : m_number(f) {}
-	virtual ~Number();
+	explicit Float(const float &f) : m_number(f) {}
+	virtual ~Float();
 
 	const float &GetNumber() const { return m_number; }
 
@@ -46,7 +46,21 @@ struct Number : public Expression
 private:
 	float m_number;
 };
-using NumberPtr = std::shared_ptr<Number>;
+using FloatPtr = std::shared_ptr<Float>;
+
+struct Integer : public Expression
+{
+	explicit Integer(const int &i) : m_number(i) {}
+	virtual ~Integer();
+
+	const int &GetInteger() const { return m_number; }
+
+	void AcceptVisitor(AstVisitor *v) override;
+
+private:
+	int m_number;
+};
+using IntegerPtr = std::shared_ptr<Integer>;
 
 struct String : public Expression
 {
@@ -208,7 +222,10 @@ using LogicOpPtr = std::shared_ptr<LogicOp>;
 
 struct Assignment : public Expression
 {
-	Assignment(std::shared_ptr<Identifier> identifier, ExpressionPtr rhs) : m_identifier(identifier), m_rhs(rhs) {}
+	Assignment(const std::shared_ptr<Identifier> &identifier, const ExpressionPtr &rhs)
+	    : m_identifier(identifier), m_rhs(rhs)
+	{
+	}
 	virtual ~Assignment();
 
 	const std::shared_ptr<Identifier> &GetIdentifier() const { return m_identifier; }
@@ -230,7 +247,7 @@ using StatementPtr = std::shared_ptr<Statement>;
 
 struct ExpressionStatement : public Statement
 {
-	ExpressionStatement(ExpressionPtr expression) : m_expression(expression) {}
+	explicit ExpressionStatement(ExpressionPtr expression) : m_expression(expression) {}
 	virtual ~ExpressionStatement();
 
 	const ExpressionPtr &GetExpression() const { return m_expression; }
@@ -281,7 +298,10 @@ using LoopPtr = std::shared_ptr<Loop>;
 
 struct VarDecl : public Statement
 {
-	VarDecl(std::shared_ptr<Identifier> identifier, ExpressionPtr rhs) : m_identifier(identifier), m_rhs(rhs) {}
+	VarDecl(const std::shared_ptr<Identifier> &identifier, const ExpressionPtr &rhs)
+	    : m_identifier(identifier), m_rhs(rhs)
+	{
+	}
 	virtual ~VarDecl();
 
 	const std::shared_ptr<Identifier> &GetIdentifier() const { return m_identifier; }
@@ -311,7 +331,7 @@ using StatementBlockPtr = std::shared_ptr<StatementBlock>;
 
 struct Call : public Expression
 {
-	Call(const ExpressionPtr &callee) : m_callee(callee) {}
+	explicit Call(const ExpressionPtr &callee) : m_callee(callee) {}
 	virtual ~Call();
 
 	ExpressionPtr GetCallee() const { return m_callee; }
@@ -349,7 +369,7 @@ using FunctionDeclarationPtr = std::shared_ptr<FunctionDeclaration>;
 
 struct Return : public Statement
 {
-	Return(ExpressionPtr returnValue) : m_returnValue(returnValue) {}
+	explicit Return(ExpressionPtr returnValue) : m_returnValue(returnValue) {}
 	virtual ~Return();
 
 	ExpressionPtr GetReturnExpression() const { return m_returnValue; }
@@ -365,7 +385,7 @@ class Program : public AstNode
 {
 public:
 	Program() = default;
-	Program(const std::vector<StatementPtr> &statements) : m_statements(statements) {}
+	explicit Program(const std::vector<StatementPtr> &statements) : m_statements(statements) {}
 	virtual ~Program();
 
 	const std::vector<StatementPtr> &GetStatements() const { return m_statements; }

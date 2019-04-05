@@ -9,8 +9,10 @@ namespace sscript
 {
 namespace ast
 {
-struct Number;
-using NumberPtr = std::shared_ptr<Number>;
+struct Float;
+using FloatPtr = std::shared_ptr<Float>;
+struct Integer;
+using IntegerPtr = std::shared_ptr<Integer>;
 struct String;
 using StringPtr = std::shared_ptr<String>;
 struct Identifier;
@@ -49,6 +51,8 @@ using ProgramPtr = std::shared_ptr<Program>;
 
 struct BaseValue;
 using BaseValuePtr = std::shared_ptr<BaseValue>;
+struct Callable;
+using CallablePtr = std::shared_ptr<Callable>;
 class SymbolTable;
 
 struct interpreter_visitor : public AstVisitor
@@ -56,7 +60,8 @@ struct interpreter_visitor : public AstVisitor
 	interpreter_visitor();
 	~interpreter_visitor();
 
-	void Visit(ast::NumberPtr n) override;
+	void Visit(ast::FloatPtr n) override;
+	void Visit(ast::IntegerPtr n) override;
 	void Visit(ast::StringPtr s) override;
 	void Visit(ast::IdentifierPtr i) override;
 	void Visit(ast::BooleanPtr b) override;
@@ -80,9 +85,9 @@ struct interpreter_visitor : public AstVisitor
 	BaseValuePtr PopValue();
 
 	void EnterBlock();
-	void ExitBlock(std::shared_ptr<SymbolTable> previousSymbolTable);
-	void EnterFunction(const std::string &name);
-	void ExitFunction(std::shared_ptr<SymbolTable> previousSymbolTable);
+	void ExitBlock(const std::shared_ptr<SymbolTable> &previousSymbolTable);
+	void EnterFunction(const CallablePtr &callable);
+	void ExitFunction(const std::shared_ptr<SymbolTable> &previousSymbolTable);
 	std::shared_ptr<SymbolTable> GetCurrentSymbolTable() { return m_symbolTable; }
 
 private:
