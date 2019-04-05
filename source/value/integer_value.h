@@ -11,7 +11,7 @@ struct Boolean;
 
 struct Integer : public BaseValue
 {
-	static const TypeInfo typeInfo;
+	static const TypeInfoPtr typeInfo;
 
 	Integer();
 	explicit Integer(const int& f);

@@ -183,6 +183,7 @@ interpreter_visitor::interpreter_visitor()
     : m_globals(std::make_shared<SymbolTable>("Global")), m_symbolTable(m_globals)
 {
 	m_globals->Declare(MAKE_BUILTIN_CALLABLE(print));
+	m_globals->Declare(MAKE_BUILTIN_CALLABLE(type));
 	m_globals->Declare(MAKE_BUILTIN_CALLABLE(time));
 }
 

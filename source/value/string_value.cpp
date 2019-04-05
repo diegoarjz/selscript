@@ -6,10 +6,10 @@
 
 namespace sscript
 {
-const TypeInfo String::typeInfo("String");
+const TypeInfoPtr String::typeInfo = std::make_shared<TypeInfo>("String");
 
-String::String() : BaseValue(typeInfo.Name()) {}
-String::String(const std::string& s) : BaseValue(typeInfo.Name()), m_value(s) {}
+String::String() : BaseValue(typeInfo) {}
+String::String(const std::string& s) : BaseValue(typeInfo), m_value(s) {}
 String::~String() {}
 
 std::string String::ToString() const { return m_value; }

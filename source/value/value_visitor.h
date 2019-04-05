@@ -10,6 +10,7 @@ struct Integer;
 struct String;
 struct NullObject;
 struct Callable;
+class TypeInfo;
 
 template<typename R>
 struct ValueVisitor
@@ -25,6 +26,7 @@ struct ValueVisitorBase
 	virtual void Visit(String*) = 0;
 	virtual void Visit(NullObject*) = 0;
 	virtual void Visit(Callable*) = 0;
+	virtual void Visit(TypeInfo*) = 0;
 };
 
 template<typename R, class V>
@@ -38,6 +40,7 @@ struct value_visitor : public ValueVisitorBase
 	void Visit(String* s) override { m_returnValue = m_visitor(*s); }
 	void Visit(NullObject* n) override { m_returnValue = m_visitor(*n); }
 	void Visit(Callable* c) override { m_returnValue = m_visitor(*c); }
+	void Visit(TypeInfo* t) override { m_returnValue = m_visitor(*t); }
 
 	R get_return_value() { return m_returnValue; }
 
@@ -56,6 +59,7 @@ struct value_visitor<void, V> : public ValueVisitorBase
 	void Visit(String* s) override { m_visitor(*s); }
 	void Visit(NullObject* n) override { m_visitor(*n); }
 	void Visit(Callable* c) override { m_visitor(*c); }
+	void Visit(TypeInfo* t) override { m_visitor(*t); }
 
 	void get_return_value() {}
 

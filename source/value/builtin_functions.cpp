@@ -25,4 +25,6 @@ IntegerPtr time()
 	long long milliseconds_since_start = std::chrono::duration_cast<std::chrono::milliseconds>(now - _start).count();
 	return std::make_shared<Integer>(milliseconds_since_start);
 }
+
+TypeInfoPtr type(const BaseValuePtr &value) { return value->m_type; }
 }  // namespace sscript

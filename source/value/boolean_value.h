@@ -8,7 +8,7 @@ namespace sscript
 {
 struct Boolean : public BaseValue
 {
-	static const TypeInfo typeInfo;
+	static const TypeInfoPtr typeInfo;
 
 	Boolean();
 	explicit Boolean(const bool& b);

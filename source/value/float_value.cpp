@@ -6,10 +6,10 @@
 
 namespace sscript
 {
-const TypeInfo Float::typeInfo("Float");
+const TypeInfoPtr Float::typeInfo = std::make_shared<TypeInfo>("Float");
 
-Float::Float() : BaseValue(typeInfo.Name()), m_value(0) {}
-Float::Float(const float& f) : BaseValue(typeInfo.Name()), m_value(f) {}
+Float::Float() : BaseValue(typeInfo), m_value(0) {}
+Float::Float(const float& f) : BaseValue(typeInfo), m_value(f) {}
 Float::~Float() {}
 
 std::string Float::ToString() const { return std::to_string(m_value); }

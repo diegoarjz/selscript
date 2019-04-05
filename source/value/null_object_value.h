@@ -8,7 +8,7 @@ namespace sscript
 {
 struct NullObject : public BaseValue
 {
-	static const TypeInfo typeInfo;
+	static const TypeInfoPtr typeInfo;
 
 	NullObject();
 	virtual ~NullObject();

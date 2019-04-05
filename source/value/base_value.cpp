@@ -2,5 +2,5 @@
 
 namespace sscript
 {
-BaseValue::BaseValue(const std::string &type) : m_typeName(type) {}
+BaseValue::BaseValue(TypeInfoPtr type) : m_type(type) {}
 }  // namespace sscript

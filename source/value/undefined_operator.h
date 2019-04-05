@@ -1,36 +1,38 @@
 #pragma once
 
-#include "type_info.h"
-
 #include <stdexcept>
+#include <string>
 
 namespace sscript
 {
+class TypeInfo;
+using TypeInfoPtr = std::shared_ptr<TypeInfo>;
+
 class UndefinedBinaryOperatorException : public std::runtime_error
 {
 public:
-	UndefinedBinaryOperatorException(const std::string &op, const TypeInfo &lhsType, const TypeInfo &rhsType);
+	UndefinedBinaryOperatorException(const std::string &op, const TypeInfoPtr &lhsType, const TypeInfoPtr &rhsType);
 	virtual ~UndefinedBinaryOperatorException();
 
-	const TypeInfo &GetLhsType() const { return m_lhsType; }
-	const TypeInfo &GetRhsType() const { return m_rhsType; }
+	const TypeInfoPtr &GetLhsType() const { return m_lhsType; }
+	const TypeInfoPtr &GetRhsType() const { return m_rhsType; }
 
 private:
 	std::string m_operatorName;
-	const TypeInfo &m_lhsType;
-	const TypeInfo &m_rhsType;
+	const TypeInfoPtr &m_lhsType;
+	const TypeInfoPtr &m_rhsType;
 };
 
 class UndefinedUnaryOperatorException : public std::runtime_error
 {
 public:
-	UndefinedUnaryOperatorException(const std::string &op, const TypeInfo &operand);
+	UndefinedUnaryOperatorException(const std::string &op, const TypeInfoPtr &operand);
 	virtual ~UndefinedUnaryOperatorException();
 
-	const TypeInfo &GetOperandType() const { return m_operandType; }
+	const TypeInfoPtr &GetOperandType() const { return m_operandType; }
 
 private:
 	std::string m_operatorName;
-	const TypeInfo &m_operandType;
+	const TypeInfoPtr &m_operandType;
 };
 }  // namespace sscript

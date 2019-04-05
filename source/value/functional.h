@@ -17,13 +17,16 @@ auto make_function(ReturnType (*p)(Args...)) -> std::function<ReturnType(Args...
 }
 
 template<typename R>
-R& argument_value(BaseValuePtr)
+const R&& argument_value(const BaseValuePtr&)
 {
-	return R{};
+	return std::forward<R>(R{});
 }
 
 template<>
-const float& argument_value<const float&>(BaseValuePtr);
+const float& argument_value<const float&>(const BaseValuePtr&);
+
+template<>
+const BaseValuePtr& argument_value<const BaseValuePtr&>(const BaseValuePtr&);
 
 template<typename R, typename... Args>
 struct call_function_helper

@@ -11,7 +11,7 @@ struct Boolean;
 
 struct Float : public BaseValue
 {
-	static const TypeInfo typeInfo;
+	static const TypeInfoPtr typeInfo;
 
 	Float();
 	explicit Float(const float& f);

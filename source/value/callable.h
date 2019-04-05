@@ -21,7 +21,7 @@ class SymbolTable;
 
 struct Callable : public BaseValue
 {
-	static const TypeInfo typeInfo;
+	static const TypeInfoPtr typeInfo;
 
 	Callable();
 	virtual ~Callable();

@@ -8,10 +8,10 @@
 
 namespace sscript
 {
-const TypeInfo Integer::typeInfo("Integer");
+const TypeInfoPtr Integer::typeInfo = std::make_shared<TypeInfo>("Integer");
 
-Integer::Integer() : BaseValue(typeInfo.Name()), m_value(0) {}
-Integer::Integer(const int& f) : BaseValue(typeInfo.Name()), m_value(f) {}
+Integer::Integer() : BaseValue(typeInfo), m_value(0) {}
+Integer::Integer(const int& f) : BaseValue(typeInfo), m_value(f) {}
 Integer::~Integer() {}
 
 std::string Integer::ToString() const { return std::to_string(m_value); }

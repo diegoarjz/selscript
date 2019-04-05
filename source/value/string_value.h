@@ -11,7 +11,7 @@ struct Boolean;
 
 struct String : public BaseValue
 {
-	static const TypeInfo typeInfo;
+	static const TypeInfoPtr typeInfo;
 
 	String();
 	explicit String(const std::string& s);

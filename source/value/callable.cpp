@@ -12,12 +12,12 @@
 
 namespace sscript
 {
-const TypeInfo Callable::typeInfo("Callable");
+const TypeInfoPtr Callable::typeInfo = std::make_shared<TypeInfo>("Callable");
 
-Callable::Callable() : BaseValue(typeInfo.Name()), m_arity(0), m_variadic(false) {}
+Callable::Callable() : BaseValue(typeInfo), m_arity(0), m_variadic(false) {}
 Callable::~Callable() {}
 
-std::string Callable::ToString() const { return "<" + m_typeName + ":" + m_identifier + ">"; }
+std::string Callable::ToString() const { return "<Callable:" + m_identifier + ">"; }
 void Callable::AcceptVisitor(ValueVisitorBase *v) { v->Visit(this); }
 
 void Callable::Call(interpreter_visitor *interpreter, const std::vector<BaseValuePtr> &args)
@@ -29,11 +29,11 @@ void Callable::Call(interpreter_visitor *interpreter, const std::vector<BaseValu
 			interpreter->GetCurrentSymbolTable()->Declare({m_parameterNames[i], args[i]});
 		}
 
-        const auto &statements = m_callableBody->GetStatements();
-        for (const auto& s : statements)
-        {
-            s->AcceptVisitor(interpreter);
-        }
+		const auto &statements = m_callableBody->GetStatements();
+		for (const auto &s : statements)
+		{
+			s->AcceptVisitor(interpreter);
+		}
 	}
 	catch (SymbolNotFoundException &e)
 	{

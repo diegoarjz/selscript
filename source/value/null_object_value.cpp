@@ -4,9 +4,9 @@
 
 namespace sscript
 {
-const TypeInfo NullObject::typeInfo("Null");
+const TypeInfoPtr NullObject::typeInfo = std::make_shared<TypeInfo>("Null");
 
-NullObject::NullObject() : BaseValue(typeInfo.Name()) {}
+NullObject::NullObject() : BaseValue(typeInfo) {}
 NullObject::~NullObject() {}
 
 std::string NullObject::ToString() const { return "null"; }
