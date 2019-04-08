@@ -559,7 +559,27 @@ void interpreter_visitor::Visit(ast::GetExpressionPtr e)
 	auto identifier = e->GetIdentifier()->GetIdentifier();
 
 	auto value = lhs->GetMember(identifier);
-	PushValue(value);
+    auto method = std::dynamic_pointer_cast<Function>(value);
+    if (method)
+    {
+        PushValue(lhs->Bind(method, m_globals));
+    }
+    else
+    {
+        PushValue(value);
+    }
+}
+
+void interpreter_visitor::Visit(ast::SetExpressionPtr e)
+{
+    e->GetLhs()->AcceptVisitor(this);
+    auto lhs = std::dynamic_pointer_cast<Instance>(PopValue());
+    auto identifier = e->GetIdentifier()->GetIdentifier();
+    e->GetRhs()->AcceptVisitor(this);
+    auto rhs = PopValue();
+
+    lhs->GetLocalSymbolTable()->Declare({identifier, rhs});
+    PushValue(rhs);
 }
 
 void interpreter_visitor::Visit(ast::ProgramPtr p)

@@ -2,8 +2,10 @@
 
 #include "function.h"
 #include "instance_value.h"
-#include "interpreter/symbol_table.h"
 #include "value_visitor.h"
+
+#include "interpreter/symbol_table.h"
+#include "interpreter/interpreter_visitor.h"
 
 namespace sscript
 {
@@ -51,12 +53,17 @@ void Class::SetCallableBody(ast::StatementBlockPtr) {}
 
 void Class::Call(interpreter_visitor* v, const std::vector<BaseValuePtr>& args)
 {
+    auto prevSymbolTable = v->GetCurrentSymbolTable();
 	auto instance = std::make_shared<Instance>(std::dynamic_pointer_cast<Class>(shared_from_this()));
-	getConstructor()->Call(v, args);
+	auto constructor = getConstructor();
+    constructor = instance->Bind(constructor, v->GetGlobals());
+    v->EnterFunction(constructor);
+    constructor->Call(v, args);
+    v->ExitFunction(prevSymbolTable);
 	throw static_cast<BaseValuePtr>(instance);
 }
 
-CallablePtr Class::getConstructor() const
+FunctionPtr Class::getConstructor() const
 {
 	if (m_constructor)
 	{
@@ -64,7 +71,7 @@ CallablePtr Class::getConstructor() const
 	}
 
 	auto symbol = m_symbolTable->Get(m_className);
-	m_constructor = std::dynamic_pointer_cast<Callable>(symbol.m_value);
+	m_constructor = std::dynamic_pointer_cast<Function>(symbol.m_value);
 
 	return m_constructor;
 }

@@ -105,10 +105,10 @@ public:
 	std::shared_ptr<BaseValue> operator-() const { throw UndefinedUnaryOperatorException("-", typeInfo); }
 
 private:
-	CallablePtr getConstructor() const;
+	FunctionPtr getConstructor() const;
 
 	std::string m_className;
-	mutable CallablePtr m_constructor;
+	mutable FunctionPtr m_constructor;
 	std::shared_ptr<SymbolTable> m_symbolTable;
 };
 using ClassPtr = std::shared_ptr<Class>;

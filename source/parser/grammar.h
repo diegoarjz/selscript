@@ -183,8 +183,9 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		/*
 		 * call -> primary ( "(" arguments? ")" | "." identifier)*
 		 */
-		call = (primary[_val = qi::_1] >> *('(' >> (-arguments)[_val = bind(make_call, _val, qi::_1)] >> ')' |
-		                                    '.' >> identifier[_val = bind(make_get_expression, _val, qi::_1)]));
+		call = primary[_val = qi::_1] >> *('(' >> (-arguments)[_val = bind(make_call, _val, qi::_1)] >> ')' |
+		                                   '.' >> identifier[_val = bind(make_get_expression, _val, qi::_1)] >>
+		                                       -('=' >> assignment[_val = bind(make_setter, qi::_val, qi::_1)]));
 
 		/*
 		 * arguments -> expression ( "," expression )*

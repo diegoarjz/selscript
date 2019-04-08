@@ -3,6 +3,7 @@
 #include "intermediate/ast.h"
 #include "intermediate/class_declaration.h"
 #include "intermediate/get_expression.h"
+#include "intermediate/set_expression.h"
 
 namespace sscript
 {
@@ -49,6 +50,7 @@ ast::ProgramPtr make_program(const std::vector<ast::StatementPtr> &statements);
 
 ast::CallPtr make_call(const ast::ExpressionPtr &callee, boost::optional<std::vector<ast::ExpressionPtr>> args);
 ast::GetExpressionPtr make_get_expression(const ast::ExpressionPtr &lhs, const ast::IdentifierPtr &identifier);
+ast::SetExpressionPtr make_setter(const ast::ExpressionPtr &lhs, const ast::ExpressionPtr &rhs);
 
 ast::FunctionDeclarationPtr make_function(ast::IdentifierPtr identifier,
                                           boost::optional<std::vector<ast::IdentifierPtr>> &parameters,

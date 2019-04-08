@@ -158,6 +158,13 @@ ast::GetExpressionPtr make_get_expression(const ast::ExpressionPtr &lhs, const a
 	return std::make_shared<ast::GetExpression>(lhs, identifier);
 }
 
+ast::SetExpressionPtr make_setter(const ast::ExpressionPtr &lhs, const ast::ExpressionPtr &rhs)
+{
+    auto getter = std::dynamic_pointer_cast<ast::GetExpression>(lhs);
+	return std::make_shared<ast::SetExpression>(getter->GetLhs(), getter->GetIdentifier(), rhs);
+}
+
+
 ast::FunctionDeclarationPtr make_function(ast::IdentifierPtr identifier,
                                           boost::optional<std::vector<ast::IdentifierPtr>> &parameters,
                                           ast::StatementBlockPtr body)

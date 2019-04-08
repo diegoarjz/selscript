@@ -85,6 +85,7 @@ struct interpreter_visitor : public AstVisitor
 	void Visit(ast::ReturnPtr r) override;
 	void Visit(ast::ClassDeclarationPtr c) override;
 	void Visit(ast::GetExpressionPtr) override;
+	void Visit(ast::SetExpressionPtr) override;
 	void Visit(ast::ProgramPtr p) override;
 
 	void PushValue(const BaseValuePtr &v);
@@ -94,7 +95,9 @@ struct interpreter_visitor : public AstVisitor
 	void ExitBlock(const std::shared_ptr<SymbolTable> &previousSymbolTable);
 	void EnterFunction(const CallablePtr &callable);
 	void ExitFunction(const std::shared_ptr<SymbolTable> &previousSymbolTable);
+
 	std::shared_ptr<SymbolTable> GetCurrentSymbolTable() { return m_symbolTable; }
+	std::shared_ptr<SymbolTable> GetGlobals() { return m_globals; }
 
 private:
 	std::stack<BaseValuePtr> m_values;

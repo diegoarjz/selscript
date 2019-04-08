@@ -19,6 +19,8 @@ using StatementBlockPtr = std::shared_ptr<StatementBlock>;
 
 struct interpreter_visitor;
 class SymbolTable;
+class Instance;
+using InstancePtr = std::shared_ptr<Instance>;
 
 struct Function : public BaseValue, public Callable
 {
@@ -26,6 +28,8 @@ struct Function : public BaseValue, public Callable
 
 	Function();
 	virtual ~Function();
+
+    Function(const Function& o);
 
 	std::string ToString() const override;
 	void AcceptVisitor(ValueVisitorBase*) override;
@@ -44,6 +48,9 @@ struct Function : public BaseValue, public Callable
 	void SetCallableBody(ast::StatementBlockPtr body) override { m_callableBody = body; }
 	void SetClosure(const std::shared_ptr<SymbolTable>& closure) override { m_closure = closure; }
 	const std::shared_ptr<SymbolTable>& GetClosure() const override { return m_closure; }
+
+    void SetBoundInstance(const InstancePtr& instance) { m_boundInstance = instance; }
+    InstancePtr GetBoundInstance() const { return m_boundInstance; }
 
 	template<class T>
 	std::shared_ptr<BaseValue> operator+(const T& o) const
@@ -117,6 +124,7 @@ private:
 	std::vector<std::string> m_parameterNames;
 	std::size_t m_arity;
 	bool m_variadic;
+    InstancePtr m_boundInstance;
 };
 using FunctionPtr = std::shared_ptr<Function>;
 

@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <memory>
 
 namespace sscript
 {

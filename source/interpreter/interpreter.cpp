@@ -14,7 +14,15 @@ Interpreter::Interpreter() {}
 bool Interpreter::Interpret(const ast::ProgramPtr &program)
 {
 	interpreter_visitor vis;
-	program->AcceptVisitor(&vis);
+	try
+	{
+		program->AcceptVisitor(&vis);
+	}
+	catch (SymbolNotFoundException &e)
+	{
+		vis.GetCurrentSymbolTable()->DumpSymbols();
+		throw e;
+	}
 
 	return false;
 }

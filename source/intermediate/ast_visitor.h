@@ -3,6 +3,7 @@
 #include "ast.h"
 #include "class_declaration.h"
 #include "get_expression.h"
+#include "set_expression.h"
 
 namespace sscript
 {
@@ -29,6 +30,7 @@ public:
 	virtual void Visit(ast::FunctionDeclarationPtr) = 0;
 	virtual void Visit(ast::ClassDeclarationPtr) = 0;
 	virtual void Visit(ast::GetExpressionPtr) = 0;
+	virtual void Visit(ast::SetExpressionPtr) = 0;
 	virtual void Visit(ast::ReturnPtr) = 0;
 	virtual void Visit(ast::ProgramPtr) = 0;
 };

@@ -18,6 +18,8 @@ public:
 		BaseValuePtr m_value;
 	};
 
+    using iterator = std::unordered_map<std::string, SymbolEntry>::iterator;
+
 	SymbolTable() = delete;
 	explicit SymbolTable(const std::string &tableName);
 	SymbolTable(const std::string &tableName, const std::shared_ptr<SymbolTable> &parentScope);
@@ -27,6 +29,9 @@ public:
 	void Declare(const SymbolEntry &&entry);
 	void Assign(const std::string &name, const BaseValuePtr &v);
 	SymbolEntry &Get(const std::string &name);
+
+    iterator begin() { return std::begin(m_symbols); }
+    iterator end() { return std::end(m_symbols); }
 
 	void DumpSymbols() const;
 

@@ -22,6 +22,8 @@ public:
 
 	ClassPtr GetClass() const { return m_class; }
 	BaseValuePtr GetMember(const std::string& name);
+    std::shared_ptr<SymbolTable>& GetLocalSymbolTable() { return m_symbolTable; }
+    FunctionPtr Bind(FunctionPtr& function, const std::shared_ptr<SymbolTable>& globals);
 
 	template<class T>
 	std::shared_ptr<BaseValue> operator+(const T& o) const

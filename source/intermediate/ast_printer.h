@@ -31,6 +31,7 @@ public:
 	void Visit(ast::ReturnPtr) override;
 	void Visit(ast::ClassDeclarationPtr) override;
 	void Visit(ast::GetExpressionPtr) override;
+	void Visit(ast::SetExpressionPtr) override;
 	void Visit(ast::ProgramPtr) override;
 
 private:

@@ -210,6 +210,16 @@ void AstPrinter::Visit(ast::GetExpressionPtr e)
 	deindent();
 }
 
+void AstPrinter::Visit(ast::SetExpressionPtr e)
+{
+	indent();
+	std::cout << indentation() << "<GetExpression>" << std::endl;
+    e->GetLhs()->AcceptVisitor(this);
+    e->GetIdentifier()->AcceptVisitor(this);
+    e->GetRhs()->AcceptVisitor(this);
+	deindent();
+}
+
 void AstPrinter::Visit(ast::ProgramPtr p)
 {
 	std::cout << "<Program>" << std::endl;
