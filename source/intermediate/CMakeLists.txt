@@ -1,6 +1,8 @@
 set(INTERMEDIATE_SOURCES
     "ast.cpp"
     "ast_printer.cpp"
+    "class_declaration.cpp"
+    "get_expression.cpp"
 )
 
 add_library(intermediate ${INTERMEDIATE_SOURCES})

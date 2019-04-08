@@ -29,6 +29,8 @@ public:
 	void Visit(ast::CallPtr) override;
 	void Visit(ast::FunctionDeclarationPtr) override;
 	void Visit(ast::ReturnPtr) override;
+	void Visit(ast::ClassDeclarationPtr) override;
+	void Visit(ast::GetExpressionPtr) override;
 	void Visit(ast::ProgramPtr) override;
 
 private:

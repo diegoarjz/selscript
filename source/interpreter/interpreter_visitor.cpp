@@ -3,10 +3,13 @@
 #include "symbol_table.h"
 #include "value/base_value.h"
 #include "value/boolean_value.h"
-#include "value/builtin_callable.h"
+#include "value/builtin_function.h"
 #include "value/builtin_functions.h"
 #include "value/callable.h"
+#include "value/class_value.h"
 #include "value/float_value.h"
+#include "value/function.h"
+#include "value/instance_value.h"
 #include "value/null_object_value.h"
 #include "value/string_value.h"
 #include "value/value_visitor.h"
@@ -454,7 +457,8 @@ void interpreter_visitor::ExitFunction(const std::shared_ptr<SymbolTable> &previ
 void interpreter_visitor::Visit(ast::CallPtr c)
 {
 	c->GetCallee()->AcceptVisitor(this);
-	auto callee = std::dynamic_pointer_cast<Callable>(PopValue());
+	auto popped = PopValue();
+	auto callee = std::dynamic_pointer_cast<Callable>(popped);
 
 	std::vector<BaseValuePtr> args;
 	for (auto &a : c->GetArguments())
@@ -491,7 +495,7 @@ void interpreter_visitor::Visit(ast::FunctionDeclarationPtr func)
 	auto parameters = func->GetParameters();
 	auto body = func->GetFunctionBody();
 
-	auto callable = std::make_shared<Callable>();
+	auto callable = std::make_shared<Function>();
 	callable->SetCallableBody(body);
 	callable->SetCallableName(identifier);
 	callable->SetClosure(GetCurrentSymbolTable());
@@ -518,6 +522,44 @@ void interpreter_visitor::Visit(ast::ReturnPtr r)
 	}
 
 	throw static_cast<BaseValuePtr>(std::make_shared<NullObject>());
+}
+
+void interpreter_visitor::Visit(ast::ClassDeclarationPtr c)
+{
+	auto &identifier = c->GetIdentifier()->GetIdentifier();
+	auto klass = std::make_shared<Class>(identifier);
+
+	GetCurrentSymbolTable()->Declare({identifier, klass});
+
+	for (auto &m : c->GetMethods())
+	{
+		auto callable = std::make_shared<Function>();
+		callable->SetCallableBody(m->GetFunctionBody());
+		callable->SetCallableName(m->GetIdentifier()->GetIdentifier());
+		callable->SetClosure(GetCurrentSymbolTable());
+
+		auto parameters = m->GetParameters();
+		std::vector<std::string> parameterNames;
+		parameterNames.reserve(parameters.size());
+		for (auto &p : parameters)
+		{
+			parameterNames.push_back(p->GetIdentifier());
+		}
+		callable->SetParameterNames(parameterNames);
+		callable->SetArity(parameterNames.size());
+
+		klass->AddMethod(m->GetIdentifier()->GetIdentifier(), callable);
+	}
+}
+
+void interpreter_visitor::Visit(ast::GetExpressionPtr e)
+{
+	e->GetLhs()->AcceptVisitor(this);
+	auto lhs = std::dynamic_pointer_cast<Instance>(PopValue());
+	auto identifier = e->GetIdentifier()->GetIdentifier();
+
+	auto value = lhs->GetMember(identifier);
+	PushValue(value);
 }
 
 void interpreter_visitor::Visit(ast::ProgramPtr p)

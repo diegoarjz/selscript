@@ -2,6 +2,7 @@
 
 #include "grammar_helpers.h"
 #include "intermediate/ast.h"
+#include "intermediate/class_declaration.h"
 
 #include <boost/phoenix/object/construct.hpp>
 #include <boost/phoenix/phoenix.hpp>
@@ -45,6 +46,7 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		kw_and = typed_kw("and");
 		kw_function = kw("function");
 		kw_return = kw("return");
+		kw_class = kw("class");
 
 		identifier = lexeme[(+(char_('_') | alpha) >> *(alnum | char_('_')))[_val = bind(make_identifier, qi::_1)]];
 		number = Integer | Float;
@@ -60,13 +62,19 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		/*
 		 * declaration -> var_decl | statement
 		 */
-		declaration = function_declaration | var_decl | statement;
+		declaration = class_declaration | function_declaration | var_decl | statement;
 
 		/*
 		 * function_declaration -> "function" identifier "(" parameters? ")" statement_block
 		 */
 		function_declaration = (kw_function >> identifier >> '(' >> -parameters >> ')' >>
 		                        statement_block)[_val = bind(make_function, qi::_1, qi::_2, qi::_3)];
+
+		/*
+		 * class_declaration -> "class" identifier "{" function_declaration* "}"
+		 */
+		class_declaration = (kw_class >> identifier >> '{' >> *function_declaration >>
+		                     '}')[_val = bind(make_class_declaration, qi::_1, qi::_2)];
 
 		/*
 		 * parameters -> expression ( "," expression )*
@@ -173,9 +181,10 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		unary = ((char_('!') | char_('-')) >> unary)[_val = bind(make_unary_op, qi::_1, qi::_2)] | call[_val = qi::_1];
 
 		/*
-		 * call -> primary ( "(" arguments? ")" )*
+		 * call -> primary ( "(" arguments? ")" | "." identifier)*
 		 */
-		call = (primary[_val = qi::_1] >> *('(' >> (-arguments)[_val = bind(make_call, _val, qi::_1)] >> ')'));
+		call = (primary[_val = qi::_1] >> *('(' >> (-arguments)[_val = bind(make_call, _val, qi::_1)] >> ')' |
+		                                    '.' >> identifier[_val = bind(make_get_expression, _val, qi::_1)]));
 
 		/*
 		 * arguments -> expression ( "," expression )*
@@ -202,6 +211,7 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 	rule<Iterator, void(), space_type> kw_for;
 	rule<Iterator, void(), space_type> kw_function;
 	rule<Iterator, void(), space_type> kw_return;
+	rule<Iterator, void(), space_type> kw_class;
 	rule<Iterator, std::string(), space_type> kw_or;
 	rule<Iterator, std::string(), space_type> kw_and;
 
@@ -234,6 +244,7 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 	rule<Iterator, ast::FunctionDeclarationPtr(), space_type> function_declaration;
 	rule<Iterator, std::vector<ast::IdentifierPtr>(), space_type> parameters;
 	rule<Iterator, ast::ReturnPtr(), space_type> return_statement;
+	rule<Iterator, ast::ClassDeclarationPtr(), space_type> class_declaration;
 	rule<Iterator, ast::ExpressionPtr(), space_type> primary;
 };
 }  // namespace sscript

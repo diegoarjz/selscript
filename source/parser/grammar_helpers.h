@@ -1,6 +1,8 @@
 #pragma once
 
 #include "intermediate/ast.h"
+#include "intermediate/class_declaration.h"
+#include "intermediate/get_expression.h"
 
 namespace sscript
 {
@@ -46,12 +48,16 @@ ast::VarDeclPtr make_var_decl(ast::IdentifierPtr &identifier, boost::optional<as
 ast::ProgramPtr make_program(const std::vector<ast::StatementPtr> &statements);
 
 ast::CallPtr make_call(const ast::ExpressionPtr &callee, boost::optional<std::vector<ast::ExpressionPtr>> args);
+ast::GetExpressionPtr make_get_expression(const ast::ExpressionPtr &lhs, const ast::IdentifierPtr &identifier);
 
 ast::FunctionDeclarationPtr make_function(ast::IdentifierPtr identifier,
                                           boost::optional<std::vector<ast::IdentifierPtr>> &parameters,
                                           const ast::StatementBlockPtr body);
 
 ast::ReturnPtr make_return_statement(boost::optional<ast::ExpressionPtr> return_expression);
+
+ast::ClassDeclarationPtr make_class_declaration(ast::IdentifierPtr identifier,
+                                                std::vector<ast::FunctionDeclarationPtr> methods);
 
 ast::StatementPtr make_for_loop(
     const boost::optional<boost::variant<ast::VarDeclPtr, ast::ExpressionStatementPtr>> &init,

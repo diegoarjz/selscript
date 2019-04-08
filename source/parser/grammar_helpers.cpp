@@ -153,6 +153,11 @@ ast::CallPtr make_call(const ast::ExpressionPtr &callee, boost::optional<std::ve
 	return call;
 }
 
+ast::GetExpressionPtr make_get_expression(const ast::ExpressionPtr &lhs, const ast::IdentifierPtr &identifier)
+{
+	return std::make_shared<ast::GetExpression>(lhs, identifier);
+}
+
 ast::FunctionDeclarationPtr make_function(ast::IdentifierPtr identifier,
                                           boost::optional<std::vector<ast::IdentifierPtr>> &parameters,
                                           ast::StatementBlockPtr body)
@@ -171,6 +176,12 @@ ast::ReturnPtr make_return_statement(boost::optional<ast::ExpressionPtr> return_
 		return std::make_shared<ast::Return>(return_expression.get());
 	}
 	return std::make_shared<ast::Return>(nullptr);
+}
+
+ast::ClassDeclarationPtr make_class_declaration(ast::IdentifierPtr identifier,
+                                                std::vector<ast::FunctionDeclarationPtr> methods)
+{
+	return std::make_shared<ast::ClassDeclaration>(identifier, methods);
 }
 
 ast::StatementPtr make_for_loop(

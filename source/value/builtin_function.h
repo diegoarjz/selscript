@@ -1,6 +1,6 @@
 #pragma once
 
-#include "callable.h"
+#include "function.h"
 #include "functional.h"
 
 namespace sscript
@@ -30,11 +30,11 @@ void return_from_function(std::function<R(Args...)> function, const std::vector<
 }
 
 template<typename FunctionType>
-struct BuiltinCallable : public Callable
+struct BuiltinFunction : public Function
 {
 public:
-	BuiltinCallable(FunctionType function) : m_function(function) {}
-	virtual ~BuiltinCallable() {}
+	BuiltinFunction(FunctionType function) : m_function(function) {}
+	virtual ~BuiltinFunction() {}
 
 	void Call(interpreter_visitor* interpreter, const std::vector<BaseValuePtr>& args)
 	{
@@ -48,10 +48,10 @@ private:
 template<typename R, typename... Args>
 struct register_callable_helper
 {
-	static std::shared_ptr<BuiltinCallable<std::function<R(Args...)>>> register_callable(
+	static std::shared_ptr<BuiltinFunction<std::function<R(Args...)>>> register_callable(
 	    const std::string& functionName, std::function<R(Args...)> function)
 	{
-		auto callable = std::make_shared<BuiltinCallable<std::function<R(Args...)>>>(function);
+		auto callable = std::make_shared<BuiltinFunction<std::function<R(Args...)>>>(function);
 		callable->SetArity(sizeof...(Args));
 		callable->SetCallableName(functionName);
 
@@ -62,10 +62,10 @@ struct register_callable_helper
 template<typename R>
 struct register_callable_helper<R, const std::vector<BaseValuePtr>&>
 {
-	static std::shared_ptr<BuiltinCallable<std::function<R(const std::vector<BaseValuePtr>&)>>> register_callable(
+	static std::shared_ptr<BuiltinFunction<std::function<R(const std::vector<BaseValuePtr>&)>>> register_callable(
 	    const std::string& functionName, std::function<R(const std::vector<BaseValuePtr>&)> function)
 	{
-		auto callable = std::make_shared<BuiltinCallable<std::function<R(const std::vector<BaseValuePtr>&)>>>(function);
+		auto callable = std::make_shared<BuiltinFunction<std::function<R(const std::vector<BaseValuePtr>&)>>>(function);
 		callable->SetCallableName(functionName);
 		callable->SetVariadic(true);
 
@@ -74,7 +74,7 @@ struct register_callable_helper<R, const std::vector<BaseValuePtr>&>
 };
 
 template<typename R, typename... Args>
-std::shared_ptr<BuiltinCallable<std::function<R(Args...)>>> register_callable(const std::string& functionName,
+std::shared_ptr<BuiltinFunction<std::function<R(Args...)>>> register_callable(const std::string& functionName,
                                                                               std::function<R(Args...)> function)
 {
 	return register_callable_helper<R, Args...>::register_callable(functionName, function);

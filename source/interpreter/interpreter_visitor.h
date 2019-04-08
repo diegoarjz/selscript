@@ -45,15 +45,19 @@ struct Call;
 using CallPtr = std::shared_ptr<Call>;
 struct FunctionDeclaration;
 using FunctionDeclarationPtr = std::shared_ptr<FunctionDeclaration>;
+class ClassDeclaration;
+using ClassDeclarationPtr = std::shared_ptr<ClassDeclaration>;
 class Program;
 using ProgramPtr = std::shared_ptr<Program>;
 }  // namespace ast
 
 struct BaseValue;
 using BaseValuePtr = std::shared_ptr<BaseValue>;
-struct Callable;
-using CallablePtr = std::shared_ptr<Callable>;
+struct Function;
+using FunctionPtr = std::shared_ptr<Function>;
 class SymbolTable;
+class Callable;
+using CallablePtr = std::shared_ptr<Callable>;
 
 struct interpreter_visitor : public AstVisitor
 {
@@ -79,6 +83,8 @@ struct interpreter_visitor : public AstVisitor
 	void Visit(ast::CallPtr c) override;
 	void Visit(ast::FunctionDeclarationPtr func) override;
 	void Visit(ast::ReturnPtr r) override;
+	void Visit(ast::ClassDeclarationPtr c) override;
+	void Visit(ast::GetExpressionPtr) override;
 	void Visit(ast::ProgramPtr p) override;
 
 	void PushValue(const BaseValuePtr &v);

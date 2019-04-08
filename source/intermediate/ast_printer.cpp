@@ -188,6 +188,28 @@ void AstPrinter::Visit(ast::ReturnPtr r)
 	deindent();
 }
 
+void AstPrinter::Visit(ast::ClassDeclarationPtr classDecl)
+{
+	indent();
+	std::cout << indentation() << "<ClassDecl>" << std::endl;
+	classDecl->GetIdentifier()->AcceptVisitor(this);
+
+	for (const auto &m : classDecl->GetMethods())
+	{
+		m->AcceptVisitor(this);
+	}
+	deindent();
+}
+
+void AstPrinter::Visit(ast::GetExpressionPtr e)
+{
+	indent();
+	std::cout << indentation() << "<GetExpression>" << std::endl;
+	e->GetLhs()->AcceptVisitor(this);
+	e->GetIdentifier()->AcceptVisitor(this);
+	deindent();
+}
+
 void AstPrinter::Visit(ast::ProgramPtr p)
 {
 	std::cout << "<Program>" << std::endl;
