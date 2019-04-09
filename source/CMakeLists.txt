@@ -88,7 +88,7 @@ target_link_libraries(
 
 install(TARGETS sscript
     EXPORT sscript-export
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/selscript/
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 install(EXPORT sscript-export

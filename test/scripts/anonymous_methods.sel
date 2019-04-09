@@ -1,0 +1,30 @@
+class Point {
+    function Point(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    function setX(x) { this.x = x; }
+    function getX() { return this.x; }
+    function setY(y) { this.y = y; }
+    function getY() { return this.y; }
+}
+
+var p = Point(1,2);
+var sum = p {
+    print("in first anonymous method");
+    print("x = " + this.x);
+    print("y = " + this.y);
+    this.setX(123);
+    this.setY(321);
+}
+{
+    print("in second anonymous method");
+    print("x = " + this.getX());
+    print("y = " + this.getY());
+}
+{
+    return this.x + this.y;
+};
+
+print("Sum = " + sum);

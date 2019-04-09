@@ -201,6 +201,15 @@ void AstPrinter::Visit(ast::ClassDeclarationPtr classDecl)
 	deindent();
 }
 
+void AstPrinter::Visit(ast::AnonymousMethodPtr a)
+{
+	indent();
+	std::cout << indentation() << "<AnonymousMethod>" << std::endl;
+	a->GetInstance()->AcceptVisitor(this);
+	a->GetBody()->AcceptVisitor(this);
+	deindent();
+}
+
 void AstPrinter::Visit(ast::GetExpressionPtr e)
 {
 	indent();
@@ -214,9 +223,9 @@ void AstPrinter::Visit(ast::SetExpressionPtr e)
 {
 	indent();
 	std::cout << indentation() << "<GetExpression>" << std::endl;
-    e->GetLhs()->AcceptVisitor(this);
-    e->GetIdentifier()->AcceptVisitor(this);
-    e->GetRhs()->AcceptVisitor(this);
+	e->GetLhs()->AcceptVisitor(this);
+	e->GetIdentifier()->AcceptVisitor(this);
+	e->GetRhs()->AcceptVisitor(this);
 	deindent();
 }
 

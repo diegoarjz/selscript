@@ -1,4 +1,5 @@
 set(REGRESSION_TEST_SCRIPTS
+    "anonymous_methods.sel"
     "arithmetic.sel"
     "classes.sel"
     "comparison.sel"

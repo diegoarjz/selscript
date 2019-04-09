@@ -552,6 +552,38 @@ void interpreter_visitor::Visit(ast::ClassDeclarationPtr c)
 	}
 }
 
+void interpreter_visitor::Visit(ast::AnonymousMethodPtr a)
+{
+	a->GetInstance()->AcceptVisitor(this);
+	auto instance = std::dynamic_pointer_cast<Instance>(PopValue());
+
+	auto callable = std::make_shared<Function>();
+	callable->SetCallableBody(a->GetBody());
+	callable->SetCallableName("AnonymousMethod");
+	callable->SetClosure(GetCurrentSymbolTable());
+	callable->SetArity(0);
+
+	callable = instance->Bind(callable, m_globals);
+	auto prevSymbolTable = GetCurrentSymbolTable();
+
+	EnterFunction(callable);
+	std::vector<BaseValuePtr> args;
+	try
+	{
+		callable->Call(this, args);
+	}
+	catch (BaseValuePtr &f)
+	{
+		ExitFunction(prevSymbolTable);
+		PushValue(f);
+		return;
+	}
+	ExitFunction(prevSymbolTable);
+
+	// By default an anonymous method returns the instance
+	PushValue(instance);
+}
+
 void interpreter_visitor::Visit(ast::GetExpressionPtr e)
 {
 	e->GetLhs()->AcceptVisitor(this);
@@ -559,27 +591,27 @@ void interpreter_visitor::Visit(ast::GetExpressionPtr e)
 	auto identifier = e->GetIdentifier()->GetIdentifier();
 
 	auto value = lhs->GetMember(identifier);
-    auto method = std::dynamic_pointer_cast<Function>(value);
-    if (method)
-    {
-        PushValue(lhs->Bind(method, m_globals));
-    }
-    else
-    {
-        PushValue(value);
-    }
+	auto method = std::dynamic_pointer_cast<Function>(value);
+	if (method)
+	{
+		PushValue(lhs->Bind(method, m_globals));
+	}
+	else
+	{
+		PushValue(value);
+	}
 }
 
 void interpreter_visitor::Visit(ast::SetExpressionPtr e)
 {
-    e->GetLhs()->AcceptVisitor(this);
-    auto lhs = std::dynamic_pointer_cast<Instance>(PopValue());
-    auto identifier = e->GetIdentifier()->GetIdentifier();
-    e->GetRhs()->AcceptVisitor(this);
-    auto rhs = PopValue();
+	e->GetLhs()->AcceptVisitor(this);
+	auto lhs = std::dynamic_pointer_cast<Instance>(PopValue());
+	auto identifier = e->GetIdentifier()->GetIdentifier();
+	e->GetRhs()->AcceptVisitor(this);
+	auto rhs = PopValue();
 
-    lhs->GetLocalSymbolTable()->Declare({identifier, rhs});
-    PushValue(rhs);
+	lhs->GetLocalSymbolTable()->Declare({identifier, rhs});
+	PushValue(rhs);
 }
 
 void interpreter_visitor::Visit(ast::ProgramPtr p)

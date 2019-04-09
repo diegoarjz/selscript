@@ -84,6 +84,7 @@ struct interpreter_visitor : public AstVisitor
 	void Visit(ast::FunctionDeclarationPtr func) override;
 	void Visit(ast::ReturnPtr r) override;
 	void Visit(ast::ClassDeclarationPtr c) override;
+	void Visit(ast::AnonymousMethodPtr c) override;
 	void Visit(ast::GetExpressionPtr) override;
 	void Visit(ast::SetExpressionPtr) override;
 	void Visit(ast::ProgramPtr p) override;

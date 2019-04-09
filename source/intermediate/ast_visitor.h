@@ -1,5 +1,6 @@
 #pragma once
 
+#include "anonymous_method.h"
 #include "ast.h"
 #include "class_declaration.h"
 #include "get_expression.h"
@@ -29,6 +30,7 @@ public:
 	virtual void Visit(ast::CallPtr) = 0;
 	virtual void Visit(ast::FunctionDeclarationPtr) = 0;
 	virtual void Visit(ast::ClassDeclarationPtr) = 0;
+	virtual void Visit(ast::AnonymousMethodPtr) = 0;
 	virtual void Visit(ast::GetExpressionPtr) = 0;
 	virtual void Visit(ast::SetExpressionPtr) = 0;
 	virtual void Visit(ast::ReturnPtr) = 0;

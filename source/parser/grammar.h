@@ -181,11 +181,12 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		unary = ((char_('!') | char_('-')) >> unary)[_val = bind(make_unary_op, qi::_1, qi::_2)] | call[_val = qi::_1];
 
 		/*
-		 * call -> primary ( "(" arguments? ")" | "." identifier)*
+		 * call -> primary ( "(" arguments? ")" | ("." identifier ('=' assignment)?) | anonymous_method)*
 		 */
 		call = primary[_val = qi::_1] >> *('(' >> (-arguments)[_val = bind(make_call, _val, qi::_1)] >> ')' |
-		                                   '.' >> identifier[_val = bind(make_get_expression, _val, qi::_1)] >>
-		                                       -('=' >> assignment[_val = bind(make_setter, qi::_val, qi::_1)]));
+		                                   ('.' >> identifier[_val = bind(make_get_expression, _val, qi::_1)] >>
+		                                    -('=' >> assignment[_val = bind(make_setter, qi::_val, qi::_1)])) |
+		                                   statement_block[_val = bind(make_anonymous_method, qi::_val, qi::_1)]);
 
 		/*
 		 * arguments -> expression ( "," expression )*

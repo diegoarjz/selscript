@@ -1,5 +1,6 @@
 #pragma once
 
+#include "intermediate/anonymous_method.h"
 #include "intermediate/ast.h"
 #include "intermediate/class_declaration.h"
 #include "intermediate/get_expression.h"
@@ -57,6 +58,7 @@ ast::FunctionDeclarationPtr make_function(ast::IdentifierPtr identifier,
                                           const ast::StatementBlockPtr body);
 
 ast::ReturnPtr make_return_statement(boost::optional<ast::ExpressionPtr> return_expression);
+ast::AnonymousMethodPtr make_anonymous_method(const ast::ExpressionPtr &instance, const ast::StatementBlockPtr &body);
 
 ast::ClassDeclarationPtr make_class_declaration(ast::IdentifierPtr identifier,
                                                 std::vector<ast::FunctionDeclarationPtr> methods);

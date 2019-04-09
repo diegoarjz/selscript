@@ -160,10 +160,9 @@ ast::GetExpressionPtr make_get_expression(const ast::ExpressionPtr &lhs, const a
 
 ast::SetExpressionPtr make_setter(const ast::ExpressionPtr &lhs, const ast::ExpressionPtr &rhs)
 {
-    auto getter = std::dynamic_pointer_cast<ast::GetExpression>(lhs);
+	auto getter = std::dynamic_pointer_cast<ast::GetExpression>(lhs);
 	return std::make_shared<ast::SetExpression>(getter->GetLhs(), getter->GetIdentifier(), rhs);
 }
-
 
 ast::FunctionDeclarationPtr make_function(ast::IdentifierPtr identifier,
                                           boost::optional<std::vector<ast::IdentifierPtr>> &parameters,
@@ -183,6 +182,11 @@ ast::ReturnPtr make_return_statement(boost::optional<ast::ExpressionPtr> return_
 		return std::make_shared<ast::Return>(return_expression.get());
 	}
 	return std::make_shared<ast::Return>(nullptr);
+}
+
+ast::AnonymousMethodPtr make_anonymous_method(const ast::ExpressionPtr &instance, const ast::StatementBlockPtr &body)
+{
+	return std::make_shared<ast::AnonymousMethod>(instance, body);
 }
 
 ast::ClassDeclarationPtr make_class_declaration(ast::IdentifierPtr identifier,

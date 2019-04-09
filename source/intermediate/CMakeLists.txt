@@ -1,4 +1,5 @@
 set(INTERMEDIATE_SOURCES
+    "anonymous_method.cpp"
     "ast.cpp"
     "ast_printer.cpp"
     "class_declaration.cpp"
@@ -7,6 +8,7 @@ set(INTERMEDIATE_SOURCES
 )
 
 set(INTERMEDIATE_PUBLIC_HEADERS
+    "anonymous_method.h"
     "ast.h"
     "ast_printer.h"
     "ast_visitor.h"

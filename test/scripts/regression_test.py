@@ -178,3 +178,27 @@ def variables_ast(test):
         .run()
 
     test.tester.file_contents_should_match("variables.ast.txt")
+
+
+@deregress.test
+def anonymous_methods_execution(test):
+    test.runner.executable(PATH_TO_SSCRIPT) \
+        .arg("anonymous_methods.sel") \
+        .arg("--run") \
+        .stdout("anonymous_methods.out.txt") \
+        .run()
+
+    test.tester.file_contents_should_match("anonymous_methods.out.txt")
+
+
+@deregress.test
+def anonymous_methods_ast(test):
+    test.runner.executable(PATH_TO_SSCRIPT) \
+        .arg("anonymous_methods.sel") \
+        .arg("--dump-ast") \
+        .stdout("anonymous_methods.ast.txt") \
+        .run()
+
+    test.tester.file_contents_should_match("anonymous_methods.ast.txt")
+
+
