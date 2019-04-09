@@ -12,6 +12,8 @@ add_library(selscript ${SEL_SCRIPT_SOURCES})
 target_include_directories(
     selscript
     PRIVATE
+        $<INSTALL_INTERFACE:selscript>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/source>
         ${Boost_INCLUDE_DIRS}
 )
 
@@ -36,6 +38,23 @@ target_link_libraries(
         value
         intermediate
         interpreter
+)
+
+
+include(GNUInstallDirs)
+install(TARGETS selscript
+    EXPORT selscript-export
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/selscript/
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/selscript/
+)
+
+install(EXPORT selscript-export
+    FILE
+        SelScriptTargets.cmake
+    NAMESPACE
+        SelScript::
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/selscript/cmake/
 )
 
 # SSCRIPT EXECUTABLE
@@ -65,4 +84,18 @@ target_link_libraries(
     PRIVATE
         Boost::program_options
         selscript
+)
+
+install(TARGETS sscript
+    EXPORT sscript-export
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/selscript/
+)
+
+install(EXPORT sscript-export
+    FILE
+        SScriptTargets.cmake
+    NAMESPACE
+        SelScript::
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/selscript/cmake/
 )

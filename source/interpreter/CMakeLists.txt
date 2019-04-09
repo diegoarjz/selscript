@@ -4,12 +4,19 @@ set(INTERPRETER_SOURCES
     "symbol_table.cpp"
 )
 
+set(INTERPRETER_PUBLIC_HEADERS
+    "interpreter.h"
+    "interpreter_visitor.h"
+    "symbol_table.h"
+)
+
 add_library(interpreter ${INTERPRETER_SOURCES})
 
 target_include_directories(
     interpreter
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/source
+        $<INSTALL_INTERFACE:selscript>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/source>
         ${Boost_INCLUDE_DIRS}
 )
 
@@ -32,4 +39,21 @@ target_link_libraries(
     PRIVATE
         intermediate
         value
+)
+
+include(GNUInstallDirs)
+install(TARGETS interpreter
+    EXPORT interpreter-export
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/selscript/interpreter
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/selscript/interpreter
+)
+install(FILES ${INTERPRETER_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/selscript/interpreter)
+
+install(EXPORT interpreter-export
+    FILE
+        InterpreterTargets.cmake
+    NAMESPACE
+        SelScript::
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/selscript/cmake/
 )

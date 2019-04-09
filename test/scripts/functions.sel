@@ -1,1 +1,8 @@
+function add_it(a, b) {
+    return a + b;
+}
+
 print("print called");
+print("add_it int: " + add_it(1,2));
+print("add_it float: " + add_it(1.0, 2.0));
+print("add_it string: " + add_it("abc", "123"));

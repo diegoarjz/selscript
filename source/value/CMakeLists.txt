@@ -14,12 +14,32 @@ set(VALUE_SOURCES
     "undefined_operator.cpp"
 )
 
+set(VALUE_PUBLIC_HEADERS
+    "base_value.h"
+    "boolean_value.h"
+    "builtin_function.h"
+    "builtin_functions.h"
+    "callable.h"
+    "class_value.h"
+    "float_value.h"
+    "function.h"
+    "functional.h"
+    "instance_value.h"
+    "integer_value.h"
+    "null_object_value.h"
+    "string_value.h"
+    "type_info.h"
+    "undefined_operator.h"
+    "value_visitor.h"
+)
+
 add_library(value ${VALUE_SOURCES})
 
 target_include_directories(
     value
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/source
+        $<INSTALL_INTERFACE:selscript>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/source>
         ${Boost_INCLUDE_DIRS}
 )
 
@@ -40,4 +60,21 @@ target_compile_options(
 target_link_libraries(
     value
     PRIVATE
+)
+
+include(GNUInstallDirs)
+install(TARGETS value
+    EXPORT value-export
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/selscript/value
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/selscript/value
+)
+install(FILES ${VALUE_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/selscript/value)
+
+install(EXPORT value-export
+    FILE
+        ValueTargets.cmake
+    NAMESPACE
+        SelScript::
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/selscript/cmake/
 )

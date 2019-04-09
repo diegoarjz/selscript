@@ -6,12 +6,22 @@ set(INTERMEDIATE_SOURCES
     "set_expression.cpp"
 )
 
+set(INTERMEDIATE_PUBLIC_HEADERS
+    "ast.h"
+    "ast_printer.h"
+    "ast_visitor.h"
+    "class_declaration.h"
+    "get_expression.h"
+    "set_expression.h"
+)
+
 add_library(intermediate ${INTERMEDIATE_SOURCES})
 
 target_include_directories(
     intermediate
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/source
+        $<INSTALL_INTERFACE:selscript>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/source>
         ${Boost_INCLUDE_DIRS}
 )
 
@@ -29,3 +39,19 @@ target_compile_options(
         -pedantic-errors
 )
 
+include(GNUInstallDirs)
+install(TARGETS intermediate
+    EXPORT intermediate-export
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/selscript/intermediate
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/selscript/intermediate
+)
+install(FILES ${INTERMEDIATE_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/selscript/intermediate)
+
+install(EXPORT intermediate-export
+    FILE
+        IntermediateTargets.cmake
+    NAMESPACE
+        SelScript::
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/selscript/cmake/
+)
