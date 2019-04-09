@@ -13,20 +13,7 @@ SymbolTable::SymbolTable(const std::string& tableName, const std::shared_ptr<Sym
 {
 }
 
-void SymbolTable::Declare(const SymbolEntry&& entry)
-{
-	SymbolEntry prevDecl;
-	try
-	{
-		prevDecl = findSymbol(entry.m_symbolName);
-	}
-	catch (SymbolNotFoundException& e)
-	{
-		m_symbols[entry.m_symbolName] = entry;
-		return;
-	}
-	throw SymbolShadowingException(entry.m_symbolName, prevDecl);
-}
+void SymbolTable::Declare(const SymbolEntry&& entry) { m_symbols[entry.m_symbolName] = entry; }
 
 void SymbolTable::Assign(const std::string& name, const BaseValuePtr& v)
 {

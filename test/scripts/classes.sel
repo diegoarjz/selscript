@@ -1,0 +1,28 @@
+class Point {
+    function Point(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    function getX() { return this.x; }
+    function getY() { return this.y; }
+
+    function setX(x) { this.x = x; }
+    function setY(y) { this.y = y; }
+}
+
+var p = Point(123.0, 321.0);
+print("p.x: " + p.getX() + " p.y: " + p.getY());
+
+p.setX(321.0);
+p.setY(123.0);
+
+print("p.x: " + p.getX() + " p.y: " + p.getY());
+
+function zeroPoint(p) {
+    p.setX(0.0);
+    p.setY(0.0);
+}
+
+zeroPoint(p);
+print("p.x: " + p.getX() + " p.y: " + p.getY());
