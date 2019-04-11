@@ -1,13 +1,13 @@
 import deregress
 import os
 
-print(__file__)
-PATH_TO_SSCRIPT = os.path.abspath(os.path.join(__file__, "../../../source/sscript"))
+THIS_DIRECTORY = os.path.dirname(__file__)
+PATH_TO_SSCRIPT = os.path.abspath(os.path.join(THIS_DIRECTORY, "../../source/sscript"))
 
 @deregress.test
 def arithmetic_execution(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("arithmetic.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "arithmetic.sel"))) \
         .arg("--run") \
         .stdout("arithmetic.out.txt") \
         .run()
@@ -18,7 +18,7 @@ def arithmetic_execution(test):
 @deregress.test
 def arithmetic_ast(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("arithmetic.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "arithmetic.sel"))) \
         .arg("--dump-ast") \
         .stdout("arithmetic.ast.txt") \
         .run()
@@ -29,7 +29,7 @@ def arithmetic_ast(test):
 @deregress.test
 def classes_execution(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("classes.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "classes.sel"))) \
         .arg("--run") \
         .stdout("classes.out.txt") \
         .run()
@@ -40,7 +40,7 @@ def classes_execution(test):
 @deregress.test
 def classes_ast(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("classes.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "classes.sel"))) \
         .arg("--dump-ast") \
         .stdout("classes.ast.txt") \
         .run()
@@ -51,7 +51,7 @@ def classes_ast(test):
 @deregress.test
 def comparison_execution(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("comparison.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "comparison.sel"))) \
         .arg("--run") \
         .stdout("comparison.out.txt") \
         .run()
@@ -62,7 +62,7 @@ def comparison_execution(test):
 @deregress.test
 def comparison_ast(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("comparison.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "comparison.sel"))) \
         .arg("--dump-ast") \
         .stdout("comparison.ast.txt") \
         .run()
@@ -73,7 +73,7 @@ def comparison_ast(test):
 @deregress.test
 def control_flow_execution(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("control_flow.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "control_flow.sel"))) \
         .arg("--run") \
         .stdout("control_flow.out.txt") \
         .run()
@@ -84,7 +84,7 @@ def control_flow_execution(test):
 @deregress.test
 def control_flow_ast(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("control_flow.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "control_flow.sel"))) \
         .arg("--dump-ast") \
         .stdout("control_flow.ast.txt") \
         .run()
@@ -95,7 +95,7 @@ def control_flow_ast(test):
 @deregress.test
 def fib_execution(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("fib.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "fib.sel"))) \
         .arg("--run") \
         .stdout("fib.out.txt") \
         .run()
@@ -106,7 +106,7 @@ def fib_execution(test):
 @deregress.test
 def fib_ast(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("fib.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "fib.sel"))) \
         .arg("--dump-ast") \
         .stdout("fib.ast.txt") \
         .run()
@@ -117,7 +117,7 @@ def fib_ast(test):
 @deregress.test
 def logic_expressions_execution(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("logic_expressions.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "logic_expressions.sel"))) \
         .arg("--run") \
         .stdout("logic_expressions.out.txt") \
         .run()
@@ -128,7 +128,7 @@ def logic_expressions_execution(test):
 @deregress.test
 def logic_expressions_ast(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("logic_expressions.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "logic_expressions.sel"))) \
         .arg("--dump-ast") \
         .stdout("logic_expressions.ast.txt") \
         .run()
@@ -139,7 +139,7 @@ def logic_expressions_ast(test):
 @deregress.test
 def functions_execution(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("functions.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "functions.sel"))) \
         .arg("--run") \
         .stdout("functions.out.txt") \
         .run()
@@ -150,7 +150,7 @@ def functions_execution(test):
 @deregress.test
 def functions_ast(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("functions.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "functions.sel"))) \
         .arg("--dump-ast") \
         .stdout("functions.ast.txt") \
         .run()
@@ -161,7 +161,7 @@ def functions_ast(test):
 @deregress.test
 def variables_execution(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("variables.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "variables.sel"))) \
         .arg("--run") \
         .stdout("variables.out.txt") \
         .run()
@@ -172,7 +172,7 @@ def variables_execution(test):
 @deregress.test
 def variables_ast(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("variables.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "variables.sel"))) \
         .arg("--dump-ast") \
         .stdout("variables.ast.txt") \
         .run()
@@ -183,7 +183,7 @@ def variables_ast(test):
 @deregress.test
 def anonymous_methods_execution(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("anonymous_methods.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "anonymous_methods.sel"))) \
         .arg("--run") \
         .stdout("anonymous_methods.out.txt") \
         .run()
@@ -194,7 +194,7 @@ def anonymous_methods_execution(test):
 @deregress.test
 def anonymous_methods_ast(test):
     test.runner.executable(PATH_TO_SSCRIPT) \
-        .arg("anonymous_methods.sel") \
+        .arg(os.path.abspath(os.path.join(THIS_DIRECTORY, "anonymous_methods.sel"))) \
         .arg("--dump-ast") \
         .stdout("anonymous_methods.ast.txt") \
         .run()
