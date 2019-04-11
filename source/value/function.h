@@ -1,9 +1,9 @@
 #pragma once
 
 #include "base_value.h"
+#include "binding/functional.h"
 #include "callable.h"
 #include "float_value.h"
-#include "functional.h"
 #include "type_info.h"
 #include "undefined_operator.h"
 
@@ -29,7 +29,7 @@ struct Function : public BaseValue, public Callable
 	Function();
 	virtual ~Function();
 
-    Function(const Function& o);
+	Function(const Function& o);
 
 	std::string ToString() const override;
 	void AcceptVisitor(ValueVisitorBase*) override;
@@ -49,8 +49,8 @@ struct Function : public BaseValue, public Callable
 	void SetClosure(const std::shared_ptr<SymbolTable>& closure) override { m_closure = closure; }
 	const std::shared_ptr<SymbolTable>& GetClosure() const override { return m_closure; }
 
-    void SetBoundInstance(const InstancePtr& instance) { m_boundInstance = instance; }
-    InstancePtr GetBoundInstance() const { return m_boundInstance; }
+	void SetBoundInstance(const InstancePtr& instance) { m_boundInstance = instance; }
+	InstancePtr GetBoundInstance() const { return m_boundInstance; }
 
 	template<class T>
 	std::shared_ptr<BaseValue> operator+(const T& o) const
@@ -124,7 +124,7 @@ private:
 	std::vector<std::string> m_parameterNames;
 	std::size_t m_arity;
 	bool m_variadic;
-    InstancePtr m_boundInstance;
+	InstancePtr m_boundInstance;
 };
 using FunctionPtr = std::shared_ptr<Function>;
 

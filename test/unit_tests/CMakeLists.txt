@@ -1,6 +1,9 @@
 set(TESTS_SRCS
     "main.cpp"
     "grammar.cpp"
+    "binding/argument_value.cpp"
+    "binding/functional.cpp"
+    "value/value_visitor.cpp"
 )
 
 add_executable(unit_tests ${TESTS_SRCS})

@@ -2,6 +2,8 @@
 
 #include "base_value.h"
 
+#include <type_traits>
+
 namespace sscript
 {
 struct Boolean;
@@ -36,7 +38,7 @@ struct ValueVisitorBase
 template<typename R, class V>
 struct value_visitor : public ValueVisitorBase
 {
-	explicit value_visitor(V& visitor) : m_visitor(visitor), m_returnValue(R{}) {}
+	explicit value_visitor(V& visitor) : m_visitor(visitor), m_returnValue() {}
 
 	void Visit(Boolean* b) override { m_returnValue = m_visitor(*b); }
 	void Visit(Float* f) override { m_returnValue = m_visitor(*f); }
@@ -79,12 +81,11 @@ typename VisitorType::return_type apply_visitor(VisitorType& vis, BaseValuePtr v
 {
 	value_visitor<typename VisitorType::return_type, VisitorType> v(vis);
 	value->AcceptVisitor(&v);
-
 	return v.get_return_value();
 }
 
 template<typename T>
-struct value_type_visitor : public ValueVisitor<T>
+struct value_type_visitor : public ValueVisitor<typename std::remove_reference<T>::type>
 {
 	T& operator()(T& t) { return t; }
 
@@ -96,7 +97,7 @@ struct value_type_visitor : public ValueVisitor<T>
 };
 
 template<typename T>
-T value_as(BaseValuePtr v)
+typename std::remove_reference<T>::type value_as(BaseValuePtr v)
 {
 	value_type_visitor<T> visitor;
 	return apply_visitor(visitor, v);

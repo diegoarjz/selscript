@@ -4,6 +4,7 @@ set(SEL_SCRIPT_SOURCES
 
 add_subdirectory(intermediate)
 add_subdirectory(value)
+add_subdirectory(binding)
 add_subdirectory(parser)
 add_subdirectory(interpreter)
 

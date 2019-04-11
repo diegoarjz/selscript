@@ -4,6 +4,7 @@
 #include "float_value.h"
 #include "null_object_value.h"
 #include "string_value.h"
+#include "value_visitor.h"
 
 #include "interpreter/interpreter_visitor.h"
 #include "interpreter/symbol_table.h"
