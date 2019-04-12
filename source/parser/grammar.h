@@ -201,6 +201,50 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		          kw_null[_val = bind(make_null)] |
 		          (number[_val = qi::_1] | string[_val = qi::_1] | identifier[_val = qi::_1]) |
 		          ('(' >> expression[_val = qi::_1] > ')');
+
+		kw_true.name("kw_true");
+		kw_false.name("kw_false");
+		kw_null.name("kw_null");
+		kw_var.name("kw_var");
+		kw_if.name("kw_if");
+		kw_else.name("kw_else");
+		kw_while.name("kw_while");
+		kw_for.name("kw_for");
+		kw_function.name("kw_function");
+		kw_return.name("kw_return");
+		kw_class.name("kw_class");
+		kw_or.name("kw_or");
+		kw_and.name("kw_and");
+		identifier.name("identifier");
+		number.name("number");
+		Float.name("Float");
+		Integer.name("Integer");
+		string.name("string");
+		program.name("program");
+		declaration.name("declaration");
+		var_decl.name("var_decl");
+		statement.name("statement");
+		statement_block.name("statement_block");
+		if_statement.name("if_statement");
+		while_loop.name("while_loop");
+		for_loop.name("for_loop");
+		expression.name("expression");
+		expression_statement.name("expression_statement");
+		assignment.name("assignment");
+		logic_or.name("logic_or");
+		logic_and.name("logic_and");
+		equality.name("equality");
+		comparison.name("comparison");
+		addition.name("addition");
+		multiplication.name("multiplication");
+		unary.name("unary");
+		call.name("call");
+		arguments.name("arguments");
+		function_declaration.name("function_declaration");
+		parameters.name("parameters");
+		return_statement.name("return_statement");
+		class_declaration.name("class_declaration");
+		primary.name("primary");
 	}
 
 	rule<Iterator, void(), space_type> kw_true;

@@ -27,14 +27,12 @@ ast::ProgramPtr Parser::Parse(const std::string &source)
 	catch (boost::spirit::qi::expectation_failure<parser_iterator> const &x)
 	{
 		r = false;
-		std::cout << "expected: something ";
-		std::cout << "got: \"" << std::string(x.first, x.last) << '"' << std::endl;
-	}
-
-	if (!r && begin != end)
-	{
-		std::cout << "Failed to parse" << std::endl;
-		std::cout << "Last parsed: " << std::string(begin, end) << std::endl;
+		std::cout << "Expected: " << x.what_;
+		std::cout << " found: " << std::string(x.first, x.last);
+		std::cout << " (line " << boost::spirit::get_line(x.first) << ")" << std::endl;
+		auto range = boost::spirit::get_current_line(x.first, x.first, x.last);
+		std::string line(range.begin(), range.end());
+		std::cout << line << std::endl;
 	}
 
 	return program;
