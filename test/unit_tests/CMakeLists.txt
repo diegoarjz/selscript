@@ -41,6 +41,5 @@ target_link_libraries(
         Boost::program_options
         selscript
         pthread
-        gmock
         gtest
 )
