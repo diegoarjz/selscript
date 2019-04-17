@@ -35,7 +35,6 @@ std::string argument_value<std::string>(const BaseValuePtr& v)
 template<>
 const BaseValuePtr& argument_value<const BaseValuePtr&>(const BaseValuePtr& v)
 {
-	std::cout << "From BaseValue" << std::endl;
 	return v;
 }
 }  // namespace sscript
