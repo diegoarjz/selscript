@@ -5,16 +5,14 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include("gtest")
 
 find_package(Boost COMPONENTS program_options)
-if (Boost_FOUND)
-    message(STATUS "Boost was found")
-else()
-	message(STATUS "Boost not found")
-endif()
 
 # Export compile comands
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(source)
 
-enable_testing()
-add_subdirectory(test)
+option(SELSCRIPT_BUILD_TESTS "Build tests" ON)
+if (SELSCRIPT_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif()
