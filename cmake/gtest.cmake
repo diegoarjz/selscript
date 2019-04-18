@@ -15,3 +15,8 @@ foreach(_source ${GOOGLETEST_SOURCES})
 endforeach()
 
 add_library(gtest ${GOOGLETEST_SOURCES})
+target_compile_features(
+    gtest
+    PRIVATE
+        cxx_std_11
+)
