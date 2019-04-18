@@ -37,6 +37,7 @@ target_compile_options(
 target_link_libraries(
     interpreter
     PRIVATE
+        binding
         intermediate
         value
 )

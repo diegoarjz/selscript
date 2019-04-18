@@ -1,29 +1,79 @@
 #include "interpreter.h"
 
-#include "intermediate/ast_visitor.h"
 #include "interpreter_visitor.h"
+#include "symbol_table.h"
 
-#include <cstdint>
-#include <iostream>
 #include <stack>
 
 namespace sscript
 {
-Interpreter::Interpreter() {}
-
-bool Interpreter::Interpret(const ast::ProgramPtr &program)
+class Interpreter::Impl
 {
-	interpreter_visitor vis;
-	try
+public:
+	Impl() {}
+	~Impl() {}
+
+	bool Interpret(const ast::ProgramPtr &program)
 	{
-		program->AcceptVisitor(&vis);
-	}
-	catch (SymbolNotFoundException &e)
-	{
-		vis.GetCurrentSymbolTable()->DumpSymbols();
-		throw e;
+		try
+		{
+			program->AcceptVisitor(&m_visitor);
+		}
+		catch (SymbolNotFoundException &e)
+		{
+			m_visitor.GetCurrentSymbolTable()->DumpSymbols();
+			throw e;
+		}
+
+		return false;
 	}
 
-	return false;
+	void PushExternalSymbols(std::shared_ptr<SymbolTable> &externalSymbols)
+	{
+		if (m_externalSymbols.size() == 0)
+		{
+			m_visitor.GetGlobals()->SetParent(externalSymbols);
+		}
+		else
+		{
+			m_externalSymbols.top()->SetParent(externalSymbols);
+		}
+		m_externalSymbols.push(externalSymbols);
+	}
+
+	void PopExternalSymbols()
+	{
+		if (m_externalSymbols.size() == 0)
+		{
+			return;
+		}
+
+		auto topExternalSymbols = m_externalSymbols.top();
+		m_externalSymbols.pop();
+
+		if (m_externalSymbols.size() == 0)
+		{
+			m_visitor.GetGlobals()->SetParent(nullptr);
+		}
+		else
+		{
+			m_externalSymbols.top()->SetParent(nullptr);
+		}
+	}
+
+private:
+	std::stack<std::shared_ptr<SymbolTable>> m_externalSymbols;
+	interpreter_visitor m_visitor;
+};
+
+Interpreter::Interpreter() : m_implementation(std::make_unique<typename Interpreter::Impl>()) {}
+Interpreter::~Interpreter() {}
+
+bool Interpreter::Interpret(const ast::ProgramPtr &program) { return m_implementation->Interpret(program); }
+
+void Interpreter::PushExternalSymbols(std::shared_ptr<SymbolTable> &externalSymbols)
+{
+	m_implementation->PushExternalSymbols(externalSymbols);
 }
+void Interpreter::PopExternalSymbols() { m_implementation->PopExternalSymbols(); }
 }  // namespace sscript

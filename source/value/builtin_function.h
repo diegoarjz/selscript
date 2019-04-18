@@ -1,7 +1,7 @@
 #pragma once
 
+#include "binding/functional.h"
 #include "function.h"
-#include "functional.h"
 
 namespace sscript
 {

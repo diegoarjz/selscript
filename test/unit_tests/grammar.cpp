@@ -43,6 +43,6 @@ std::string validIdentifiers[] = {
     "var_i", "if_i", "else_i", "while_i", "for_i",
     "or_i", "and_i"
 };
-INSTANTIATE_TEST_CASE_P(ValidIdentifiers, IdentifierTest,
+INSTANTIATE_TEST_SUITE_P(ValidIdentifiers, IdentifierTest,
         ::testing::ValuesIn(validIdentifiers));
 // clang-format on

@@ -10,6 +10,7 @@
 #include "value/float_value.h"
 #include "value/function.h"
 #include "value/instance_value.h"
+#include "value/integer_value.h"
 #include "value/null_object_value.h"
 #include "value/string_value.h"
 #include "value/value_visitor.h"
