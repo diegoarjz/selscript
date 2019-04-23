@@ -31,7 +31,7 @@ set(VALUE_PUBLIC_HEADERS
     "value_visitor.h"
 )
 
-add_library(value ${VALUE_SOURCES})
+add_library(value OBJECT ${VALUE_SOURCES})
 
 target_include_directories(
     value
@@ -53,11 +53,6 @@ target_compile_options(
         -Wall
         -Werror
         -pedantic-errors
-)
-
-target_link_libraries(
-    value
-    PRIVATE
 )
 
 include(GNUInstallDirs)

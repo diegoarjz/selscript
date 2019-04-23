@@ -9,7 +9,9 @@ set(PARSER_PUBLIC_HEADERS
     "parser.h"
 )
 
-add_library(parser ${PARSER_SOURCES})
+add_library(parser OBJECT ${PARSER_SOURCES}
+        $<TARGET_OBJECTS:intermediate>
+)
 
 target_include_directories(
     parser
@@ -36,7 +38,6 @@ target_compile_options(
 target_link_libraries(
     parser
     PRIVATE
-        intermediate
 )
 
 include(GNUInstallDirs)

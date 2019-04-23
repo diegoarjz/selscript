@@ -10,7 +10,11 @@ set(INTERPRETER_PUBLIC_HEADERS
     "symbol_table.h"
 )
 
-add_library(interpreter ${INTERPRETER_SOURCES})
+add_library(interpreter OBJECT ${INTERPRETER_SOURCES}
+        $<TARGET_OBJECTS:binding>
+        $<TARGET_OBJECTS:intermediate>
+        $<TARGET_OBJECTS:value>
+)
 
 target_include_directories(
     interpreter
@@ -37,9 +41,6 @@ target_compile_options(
 target_link_libraries(
     interpreter
     PRIVATE
-        binding
-        intermediate
-        value
 )
 
 include(GNUInstallDirs)

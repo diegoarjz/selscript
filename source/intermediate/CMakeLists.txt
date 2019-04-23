@@ -17,7 +17,7 @@ set(INTERMEDIATE_PUBLIC_HEADERS
     "set_expression.h"
 )
 
-add_library(intermediate ${INTERMEDIATE_SOURCES})
+add_library(intermediate OBJECT ${INTERMEDIATE_SOURCES})
 
 target_include_directories(
     intermediate

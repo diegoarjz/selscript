@@ -8,7 +8,7 @@ set(BINDING_PUBLIC_HEADERS
     "functional.h"
 )
 
-add_library(binding ${BINDING_SOURCES})
+add_library(binding OBJECT ${BINDING_SOURCES})
 
 target_include_directories(
     binding

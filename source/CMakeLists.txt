@@ -8,7 +8,13 @@ add_subdirectory(binding)
 add_subdirectory(parser)
 add_subdirectory(interpreter)
 
-add_library(selscript ${SEL_SCRIPT_SOURCES})
+add_library(selscript STATIC ${SEL_SCRIPT_SOURCES}
+        $<TARGET_OBJECTS:parser>
+        $<TARGET_OBJECTS:value>
+        $<TARGET_OBJECTS:intermediate>
+        $<TARGET_OBJECTS:interpreter>
+        $<TARGET_OBJECTS:binding>
+)
 
 target_include_directories(
     selscript
@@ -35,10 +41,6 @@ target_compile_options(
 target_link_libraries(
     selscript
     PRIVATE
-        parser
-        value
-        intermediate
-        interpreter
 )
 
 
