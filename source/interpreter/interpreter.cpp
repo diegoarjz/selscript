@@ -67,6 +67,7 @@ private:
 };
 
 Interpreter::Interpreter() : m_implementation(std::make_unique<typename Interpreter::Impl>()) {}
+
 Interpreter::~Interpreter() {}
 
 bool Interpreter::Interpret(const ast::ProgramPtr &program) { return m_implementation->Interpret(program); }
@@ -75,5 +76,6 @@ void Interpreter::PushExternalSymbols(std::shared_ptr<SymbolTable> &externalSymb
 {
 	m_implementation->PushExternalSymbols(externalSymbols);
 }
+
 void Interpreter::PopExternalSymbols() { m_implementation->PopExternalSymbols(); }
 }  // namespace sscript

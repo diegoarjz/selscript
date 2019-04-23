@@ -99,10 +99,12 @@ struct interpreter_visitor : public AstVisitor
 
 	std::shared_ptr<SymbolTable> GetCurrentSymbolTable() { return m_symbolTable; }
 	std::shared_ptr<SymbolTable> GetGlobals() { return m_globals; }
+	BaseValuePtr GetLastEvaluatedExpression() const { return m_lastValue; }
 
 private:
 	std::stack<BaseValuePtr> m_values;
 	std::shared_ptr<SymbolTable> m_globals;
 	std::shared_ptr<SymbolTable> m_symbolTable;
+	BaseValuePtr m_lastValue;
 };
 }  // namespace sscript

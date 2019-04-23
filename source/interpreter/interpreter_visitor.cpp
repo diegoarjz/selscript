@@ -623,19 +623,12 @@ void interpreter_visitor::Visit(ast::ProgramPtr p)
 	}
 }
 
-void interpreter_visitor::PushValue(const BaseValuePtr &v)
-{
-	// value_visitor vis;
-	// std::cout << "Pushing value " << apply_visitor(vis, v) << std::endl;
-	m_values.push(v);
-}
+void interpreter_visitor::PushValue(const BaseValuePtr &v) { m_values.push(v); }
 
 BaseValuePtr interpreter_visitor::PopValue()
 {
-	BaseValuePtr v = m_values.top();
+	m_lastValue = m_values.top();
 	m_values.pop();
-	// value_visitor vis;
-	// std::cout << "Popping value " << apply_visitor(vis, v) << std::endl;
-	return v;
+	return m_lastValue;
 }
 }  // namespace sscript
