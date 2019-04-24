@@ -11,6 +11,9 @@ class Program;
 using ProgramPtr = std::shared_ptr<Program>;
 }  // namespace ast
 
+struct BaseValue;
+using BaseValuePtr = std::shared_ptr<BaseValue>;
+
 class SymbolTable;
 
 class Interpreter
@@ -23,6 +26,8 @@ public:
 
 	void PushExternalSymbols(std::shared_ptr<SymbolTable> &externalSymbols);
 	void PopExternalSymbols();
+
+	BaseValuePtr GetLastEvaluatedExpression() const;
 
 private:
 	class Impl;

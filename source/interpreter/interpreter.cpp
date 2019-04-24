@@ -61,6 +61,8 @@ public:
 		}
 	}
 
+	BaseValuePtr GetLastEvaluatedExpression() const { return m_visitor.GetLastEvaluatedExpression(); }
+
 private:
 	std::stack<std::shared_ptr<SymbolTable>> m_externalSymbols;
 	interpreter_visitor m_visitor;
@@ -78,4 +80,6 @@ void Interpreter::PushExternalSymbols(std::shared_ptr<SymbolTable> &externalSymb
 }
 
 void Interpreter::PopExternalSymbols() { m_implementation->PopExternalSymbols(); }
+
+BaseValuePtr Interpreter::GetLastEvaluatedExpression() const { return m_implementation->GetLastEvaluatedExpression(); }
 }  // namespace sscript
