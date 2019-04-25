@@ -57,7 +57,7 @@ public:
 		return arity;
 	}
 	virtual bool IsVariadic() const override { return false; }
-	virtual const std::vector<std::string>& GetParameterNames() const override
+	virtual const std::vector<ast::ParameterPtr>& GetParameters() const override
 	{
 		static const std::vector<std::string> parameters;
 		return parameters;

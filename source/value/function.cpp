@@ -37,7 +37,21 @@ void Function::Call(interpreter_visitor *interpreter, const std::vector<BaseValu
 {
 	for (std::size_t i = 0; i < GetArity(); ++i)
 	{
-		interpreter->GetCurrentSymbolTable()->Declare({m_parameterNames[i], args[i]});
+		auto parameter = m_parameterNames[i];
+		auto parameterName = parameter->GetIdentifier();
+		auto parameterType = parameter->GetParameterType();
+
+		if (parameterType)
+		{
+			auto type = interpreter->GetCurrentSymbolTable()->Get(*parameterType).m_value;
+			if ((type->m_type == nullptr || type->m_type != args[i]->m_type) && type != args[i]->m_type)
+			{
+				throw std::runtime_error("Argument type mismatch. expected: " + type->ToString() +
+				                         " received: " + args[i]->m_type->ToString());
+			}
+		}
+
+		interpreter->GetCurrentSymbolTable()->Declare({parameterName, args[i]});
 	}
 
 	const auto &statements = m_callableBody->GetStatements();

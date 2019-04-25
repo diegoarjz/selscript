@@ -3,7 +3,9 @@ set(INTERMEDIATE_SOURCES
     "ast.cpp"
     "ast_printer.cpp"
     "class_declaration.cpp"
+    "function_declaration.cpp"
     "get_expression.cpp"
+    "parameter.cpp"
     "set_expression.cpp"
 )
 
@@ -13,7 +15,9 @@ set(INTERMEDIATE_PUBLIC_HEADERS
     "ast_printer.h"
     "ast_visitor.h"
     "class_declaration.h"
+    "function_declaration.h"
     "get_expression.h"
+    "parameter.h"
     "set_expression.h"
 )
 

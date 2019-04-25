@@ -31,8 +31,8 @@ public:
 	const std::size_t& GetArity() const override;
 	bool IsVariadic() const override;
 	void SetVariadic(bool) override;
-	void SetParameterNames(const std::vector<std::string>&) override;
-	const std::vector<std::string>& GetParameterNames() const override;
+	void SetParameters(const std::vector<ast::ParameterPtr>&) override;
+	const std::vector<ast::ParameterPtr>& GetParameters() const override;
 	void SetClosure(const std::shared_ptr<SymbolTable>&) override;
 	const std::shared_ptr<SymbolTable>& GetClosure() const override;
 	void SetCallableBody(ast::StatementBlockPtr) override;

@@ -165,15 +165,27 @@ ast::SetExpressionPtr make_setter(const ast::ExpressionPtr &lhs, const ast::Expr
 }
 
 ast::FunctionDeclarationPtr make_function(ast::IdentifierPtr identifier,
-                                          boost::optional<std::vector<ast::IdentifierPtr>> &parameters,
+                                          boost::optional<std::vector<ast::ParameterPtr>> &parameters,
                                           ast::StatementBlockPtr body)
 {
 	if (parameters)
 	{
 		return std::make_shared<ast::FunctionDeclaration>(identifier, parameters.get(), body);
 	}
-	return std::make_shared<ast::FunctionDeclaration>(identifier, std::vector<ast::IdentifierPtr>{}, body);
+	return std::make_shared<ast::FunctionDeclaration>(identifier, std::vector<ast::ParameterPtr>{}, body);
 }
+
+ast::ParameterPtr make_parameter(ast::IdentifierPtr identifier)
+{
+    return std::make_shared<ast::Parameter>(identifier->GetIdentifier());
+}
+
+ast::ParameterPtr add_parameter_type(ast::ParameterPtr parameter, ast::IdentifierPtr parameterType)
+{
+    parameter->SetParameterType(parameterType->GetIdentifier());
+    return parameter;
+}
+
 
 ast::ReturnPtr make_return_statement(boost::optional<ast::ExpressionPtr> return_expression)
 {

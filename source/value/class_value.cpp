@@ -4,8 +4,8 @@
 #include "instance_value.h"
 #include "value_visitor.h"
 
-#include "interpreter/symbol_table.h"
 #include "interpreter/interpreter_visitor.h"
+#include "interpreter/symbol_table.h"
 
 namespace sscript
 {
@@ -41,9 +41,9 @@ bool Class::IsVariadic() const { return getConstructor()->IsVariadic(); }
 
 void Class::SetVariadic(bool) {}
 
-void Class::SetParameterNames(const std::vector<std::string>&) {}
+void Class::SetParameters(const std::vector<ast::ParameterPtr>&) {}
 
-const std::vector<std::string>& Class::GetParameterNames() const { return getConstructor()->GetParameterNames(); }
+const std::vector<ast::ParameterPtr>& Class::GetParameters() const { return getConstructor()->GetParameters(); }
 
 void Class::SetClosure(const std::shared_ptr<SymbolTable>&) {}
 
@@ -53,13 +53,13 @@ void Class::SetCallableBody(ast::StatementBlockPtr) {}
 
 void Class::Call(interpreter_visitor* v, const std::vector<BaseValuePtr>& args)
 {
-    auto prevSymbolTable = v->GetCurrentSymbolTable();
+	auto prevSymbolTable = v->GetCurrentSymbolTable();
 	auto instance = std::make_shared<Instance>(std::dynamic_pointer_cast<Class>(shared_from_this()));
 	auto constructor = getConstructor();
-    constructor = instance->Bind(constructor, v->GetGlobals());
-    v->EnterFunction(constructor);
-    constructor->Call(v, args);
-    v->ExitFunction(prevSymbolTable);
+	constructor = instance->Bind(constructor, v->GetGlobals());
+	v->EnterFunction(constructor);
+	constructor->Call(v, args);
+	v->ExitFunction(prevSymbolTable);
 	throw static_cast<BaseValuePtr>(instance);
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ast.h"
+#include "function_declaration.h"
 
 namespace sscript
 {

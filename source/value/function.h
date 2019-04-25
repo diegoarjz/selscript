@@ -43,8 +43,8 @@ struct Function : public BaseValue, public Callable
 	bool IsVariadic() const override { return m_variadic; }
 	void SetVariadic(bool variadic) override { m_variadic = variadic; }
 
-	void SetParameterNames(const std::vector<std::string>& parameters) override { m_parameterNames = parameters; }
-	const std::vector<std::string>& GetParameterNames() const override { return m_parameterNames; }
+	void SetParameters(const std::vector<ast::ParameterPtr>& parameters) override { m_parameterNames = parameters; }
+	const std::vector<ast::ParameterPtr>& GetParameters() const override { return m_parameterNames; }
 	void SetCallableBody(ast::StatementBlockPtr body) override { m_callableBody = body; }
 	void SetClosure(const std::shared_ptr<SymbolTable>& closure) override { m_closure = closure; }
 	const std::shared_ptr<SymbolTable>& GetClosure() const override { return m_closure; }
@@ -121,7 +121,7 @@ private:
 	std::shared_ptr<SymbolTable> m_closure;
 	ast::StatementBlockPtr m_callableBody;
 	std::string m_identifier;
-	std::vector<std::string> m_parameterNames;
+	std::vector<ast::ParameterPtr> m_parameterNames;
 	std::size_t m_arity;
 	bool m_variadic;
 	InstancePtr m_boundInstance;

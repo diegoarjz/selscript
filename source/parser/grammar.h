@@ -77,9 +77,15 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 		                     '}')[_val = bind(make_class_declaration, qi::_1, qi::_2)];
 
 		/*
-		 * parameters -> expression ( "," expression )*
+		 * parameter -> identifier ( ":" identifier )?
 		 */
-		parameters = identifier % ',';
+		parameter = identifier[_val = bind(make_parameter, qi::_1)] >>
+		            -(':' >> identifier[_val = bind(add_parameter_type, _val, qi::_1)]);
+
+		/*
+		 * parameters -> identifier ( "," identifier )*
+		 */
+		parameters = parameter % ',';
 
 		/*
 		 * return_statement -> "return" expression? ';'
@@ -288,7 +294,8 @@ struct grammar : boost::spirit::qi::grammar<Iterator, ast::ProgramPtr(), boost::
 	rule<Iterator, ast::ExpressionPtr(), space_type> call;
 	rule<Iterator, std::vector<ast::ExpressionPtr>(), space_type> arguments;
 	rule<Iterator, ast::FunctionDeclarationPtr(), space_type> function_declaration;
-	rule<Iterator, std::vector<ast::IdentifierPtr>(), space_type> parameters;
+	rule<Iterator, ast::ParameterPtr(), space_type> parameter;
+	rule<Iterator, std::vector<ast::ParameterPtr>(), space_type> parameters;
 	rule<Iterator, ast::ReturnPtr(), space_type> return_statement;
 	rule<Iterator, ast::ClassDeclarationPtr(), space_type> class_declaration;
 	rule<Iterator, ast::ExpressionPtr(), space_type> primary;

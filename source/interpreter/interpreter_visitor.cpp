@@ -189,6 +189,10 @@ interpreter_visitor::interpreter_visitor()
 	m_globals->Declare(MAKE_BUILTIN_CALLABLE(print));
 	m_globals->Declare(MAKE_BUILTIN_CALLABLE(type));
 	m_globals->Declare(MAKE_BUILTIN_CALLABLE(time));
+	m_globals->Declare({"Integer", Integer::typeInfo});
+	m_globals->Declare({"Boolean", Boolean::typeInfo});
+	m_globals->Declare({"Float", Float::typeInfo});
+	m_globals->Declare({"String", String::typeInfo});
 }
 
 interpreter_visitor::~interpreter_visitor() {}
@@ -501,17 +505,13 @@ void interpreter_visitor::Visit(ast::FunctionDeclarationPtr func)
 	callable->SetCallableName(identifier);
 	callable->SetClosure(GetCurrentSymbolTable());
 
-	std::vector<std::string> parameterNames;
-	parameterNames.reserve(parameters.size());
-	for (auto &p : parameters)
-	{
-		parameterNames.push_back(p->GetIdentifier());
-	}
-	callable->SetParameterNames(parameterNames);
-	callable->SetArity(parameterNames.size());
+	callable->SetParameters(parameters);
+	callable->SetArity(parameters.size());
 
 	GetCurrentSymbolTable()->Declare({identifier, callable});
 }
+
+void interpreter_visitor::Visit(ast::ParameterPtr par) { throw std::runtime_error("Unimplemented"); }
 
 void interpreter_visitor::Visit(ast::ReturnPtr r)
 {
@@ -540,14 +540,8 @@ void interpreter_visitor::Visit(ast::ClassDeclarationPtr c)
 		callable->SetClosure(GetCurrentSymbolTable());
 
 		auto parameters = m->GetParameters();
-		std::vector<std::string> parameterNames;
-		parameterNames.reserve(parameters.size());
-		for (auto &p : parameters)
-		{
-			parameterNames.push_back(p->GetIdentifier());
-		}
-		callable->SetParameterNames(parameterNames);
-		callable->SetArity(parameterNames.size());
+		callable->SetParameters(parameters);
+		callable->SetArity(parameters.size());
 
 		klass->AddMethod(m->GetIdentifier()->GetIdentifier(), callable);
 	}

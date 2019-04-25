@@ -176,6 +176,22 @@ void AstPrinter::Visit(ast::FunctionDeclarationPtr f)
 	deindent();
 }
 
+void AstPrinter::Visit(ast::ParameterPtr par)
+{
+	indent();
+	std::cout << indentation() << "<Parameter:" << par->GetIdentifier() << "(";
+	if (par->GetParameterType())
+	{
+		std::cout << *(par->GetParameterType());
+	}
+	else
+	{
+		std::cout << "any";
+	}
+	std::cout << ")>" << std::endl;
+	deindent();
+}
+
 void AstPrinter::Visit(ast::ReturnPtr r)
 {
 	indent();

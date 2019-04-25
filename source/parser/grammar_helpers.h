@@ -5,6 +5,7 @@
 #include "intermediate/class_declaration.h"
 #include "intermediate/get_expression.h"
 #include "intermediate/set_expression.h"
+#include "intermediate/parameter.h"
 
 namespace sscript
 {
@@ -54,8 +55,11 @@ ast::GetExpressionPtr make_get_expression(const ast::ExpressionPtr &lhs, const a
 ast::SetExpressionPtr make_setter(const ast::ExpressionPtr &lhs, const ast::ExpressionPtr &rhs);
 
 ast::FunctionDeclarationPtr make_function(ast::IdentifierPtr identifier,
-                                          boost::optional<std::vector<ast::IdentifierPtr>> &parameters,
+                                          boost::optional<std::vector<ast::ParameterPtr>> &parameters,
                                           const ast::StatementBlockPtr body);
+
+ast::ParameterPtr make_parameter(ast::IdentifierPtr identifier);
+ast::ParameterPtr add_parameter_type(ast::ParameterPtr parameter, ast::IdentifierPtr parameterType);
 
 ast::ReturnPtr make_return_statement(boost::optional<ast::ExpressionPtr> return_expression);
 ast::AnonymousMethodPtr make_anonymous_method(const ast::ExpressionPtr &instance, const ast::StatementBlockPtr &body);
